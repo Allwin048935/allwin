@@ -9,8 +9,8 @@ from telegram import Bot
 from config import symbols  # Import symbols from config.py
 
 # Binance API credentials
-api_key = 'M0l4CVC4p0BYOqtQbuBtRI8yUHf20a0kbzn61QwrJi7ToAbzFek5whlCoTaa8FAf'
-api_secret = 'gxdmqiBh9YB5ADYA2h7bRigxZAz2x1HRCkkr88Lx0pdWeilnJmdyxLIuoUSvG4v4'
+api_key = '0nzlZCz4ud1jML1hQRRklusBi9DybWkE7bWS2fwO16e4gAF5tG4ot2o3GwLQefqs'
+api_secret = 'xcKEebmuG1JmPLsoeRODFtAmaAm2pgIofgDSTI2LTDeixkJZb9G0jSpT6zQkjlT7'
 interval = '15m'  # 1-day candlesticks
 
 # Telegram Bot Token and Chat ID
@@ -39,8 +39,8 @@ def check_ema_cross(df, short_period=7, long_period=100):
     df['ema_short'] = ema_indicator(df['close'], window=short_period)
     df['ema_long'] = ema_indicator(df['close'], window=long_period)
 
-    cross_over = df['ema_short'][-1] > df['ema_long'][-1] and df['ema_short'][-2] <= df['ema_long'][-2] and df['ema_short'][-3] <= df['ema_long'][-3]
-    cross_under = df['ema_short'][-1] < df['ema_long'][-1] and df['ema_short'][-2] >= df['ema_long'][-2] and df['ema_short'][-3] >= df['ema_long'][-3]
+    cross_over = df['ema_short'][-2] > df['ema_long'][-2] and df['ema_short'][-3] <= df['ema_long'][-3] and df['ema_short'][-4] <= df['ema_long'][-4]
+    cross_under = df['ema_short'][-2] < df['ema_long'][-2] and df['ema_short'][-3] >= df['ema_long'][-3] and df['ema_short'][-4] >= df['ema_long'][-4]
 
     return cross_over, cross_under
 
