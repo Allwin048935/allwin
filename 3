@@ -158,3 +158,8 @@ def ema_strategy():
             time.sleep(60)
 
         except Exception as e:
+            print(f'An error occurred: {e}')
+            time.sleep(60)  # Wait for a minute before trying again
+
+# Run the trading strategy
+ema_strategy()
