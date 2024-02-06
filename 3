@@ -113,7 +113,7 @@ def ema_strategy():
                 if (
                     historical_data['short_ema'].iloc[-2] > historical_data['long_ema'].iloc[-2] and
                     historical_data['short_ema'].iloc[-3] <= historical_data['long_ema'].iloc[-3]
-):
+                    ):
                     print(f'{symbol} Long Entry Signal')
                     # Cancel existing short position if any
                     cancel_open_orders(symbol)
