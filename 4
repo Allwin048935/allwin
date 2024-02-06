@@ -164,11 +164,11 @@ def ema_strategy():
                     historical_data['short_ema'].iloc[-3] > historical_data['medium_ema'].iloc[-3] and
                     historical_data['short_ema'].iloc[-4] <= historical_data['medium_ema'].iloc[-4] 
                 ):
-                print(f'{symbol} Short Exit Signal')
-                # Close existing short position if any
-                if open_positions[symbol] == 'SHORT':
-                    close_short_position(symbol, quantity)
-                open_positions[symbol] = None
+                    print(f'{symbol} Short Exit Signal')
+                    # Close existing short position if any
+                    if open_positions[symbol] == 'SHORT':
+                        close_short_position(symbol, quantity)
+                    open_positions[symbol] = None
 
         # Sleep for some time (e.g., 5 minutes) before checking again
         time.sleep(60)
