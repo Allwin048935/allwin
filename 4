@@ -162,7 +162,7 @@ def ema_strategy():
 
                 elif (
                     historical_data['short_ema'].iloc[-3] > historical_data['medium_ema'].iloc[-3] and
-                    historical_data['short_ema'].iloc[-4] <= historical_data['medium_ema'].iloc[-4]
+                    historical_data['short_ema'].iloc[-4] <= historical_data['medium_ema'].iloc[-4] 
                 ):
                 print(f'{symbol} Short Exit Signal')
                 # Close existing short position if any
