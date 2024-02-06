@@ -122,9 +122,8 @@ def ema_strategy():
                     last_order_types[symbol] = 'BUY'
 
                 elif (
-                    historical_data['short_ema'].iloc[-2] < historical_data['long_ema'].iloc[-2] and
-                    historical_data['short_ema'].iloc[-3] >= historical_data['long_ema'].iloc[-3] and
-                    historical_data['short_ema'].iloc[-2] > historical_data['medium_ema'].iloc[-2]
+                    historical_data['short_ema'].iloc[-2] < historical_data['medium_ema'].iloc[-2] and
+                    historical_data['short_ema'].iloc[-3] >= historical_data['medium_ema'].iloc[-3]
                 ):
                     print(f'{symbol} Long Exit Signal')
                     # Cancel existing long position if any
@@ -135,8 +134,7 @@ def ema_strategy():
 
                 elif (
                     historical_data['short_ema'].iloc[-2] < historical_data['long_ema'].iloc[-2] and
-                    historical_data['short_ema'].iloc[-3] >= historical_data['long_ema'].iloc[-3] and
-                    historical_data['short_ema'].iloc[-2] < historical_data['medium_ema'].iloc[-2]
+                    historical_data['short_ema'].iloc[-3] >= historical_data['long_ema'].iloc[-3]
                 ):
                     print(f'{symbol} Short Entry Signal')
                     # Cancel existing long position if any
@@ -146,9 +144,8 @@ def ema_strategy():
                     last_order_types[symbol] = 'SELL'
 
                 elif (
-                    historical_data['short_ema'].iloc[-2] > historical_data['long_ema'].iloc[-2] and
-                    historical_data['short_ema'].iloc[-3] <= historical_data['long_ema'].iloc[-3] and
-                    historical_data['short_ema'].iloc[-2] > historical_data['medium_ema'].iloc[-2]
+                    historical_data['short_ema'].iloc[-2] > historical_data['medium_ema'].iloc[-2] and
+                    historical_data['short_ema'].iloc[-3] <= historical_data['medium_ema'].iloc[-3]
                 ):
                     print(f'{symbol} Short Exit Signal')
                     # Cancel existing short position if any
