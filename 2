@@ -119,7 +119,7 @@ def ema_strategy():
                      historical_data['short_ema'].iloc[-4] <= historical_data['medium_ema'].iloc[-4] and
                      historical_data['short_ema'].iloc[-2] > historical_data['long_ema'].iloc[-2] and
                      historical_data['short_ema'].iloc[-3] > historical_data['long_ema'].iloc[-3] and
-                     historical_data['short_ema'].iloc[-4] > historical_data['long_ema'].iloc[-4]
+                     historical_data['short_ema'].iloc[-4] > historical_data['long_ema'].iloc[-4])
                 ):
                     print(f'{symbol} Buy Signal (Crossover)')
                     # Cancel existing short position if any
