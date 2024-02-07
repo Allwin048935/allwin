@@ -141,7 +141,7 @@ def ema_strategy():
                     last_order_types[symbol] = 'LONG'
 
                 elif (
-                    last_order_types[symbol] != 'LONG' and
+                    last_order_types[symbol] == 'LONG' and
                     historical_data['short_ema'].iloc[-2] <= historical_data['medium_ema'].iloc[-2] and
                     historical_data['short_ema'].iloc[-3] >= historical_data['medium_ema'].iloc[-3] 
                 ):
@@ -167,7 +167,7 @@ def ema_strategy():
                     last_order_types[symbol] = 'SHORT'
 
                 elif (
-                    last_order_types[symbol] != 'SHORT' and
+                    last_order_types[symbol] == 'SHORT' and
                     historical_data['short_ema'].iloc[-2] > historical_data['medium_ema'].iloc[-2] and
                     historical_data['short_ema'].iloc[-3] <= historical_data['medium_ema'].iloc[-3] 
                 ):
