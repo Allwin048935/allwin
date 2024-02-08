@@ -72,7 +72,7 @@ def ema_strategy():
         try:
             for symbol in symbols:
                 # Fetch historical data for each symbol
-                historical_data = fetch_ohlcv(symbol, time_interval, 250)
+                historical_data = fetch_ohlcv(symbol, time_interval, 100)
 
                 # Check if there's enough data for EMA calculation
                 if len(historical_data) < long_ema_period:
@@ -105,9 +105,8 @@ def ema_strategy():
                 if (
     (
         (historical_data['short_ema'].iloc[-2] > historical_data['long_ema'].iloc[-2] and
-        historical_data['short_ema'].iloc[-3] <= historical_data['long_ema'].iloc[-3] and 
+        historical_data['short_ema'].iloc[-3] <= historical_data['long_ema'].iloc[-3]) and 
         last_order_types[symbol] != 'BUY'
-    )
 ):
                     print(f'{symbol} Buy Signal (Crossover)')
                     # Implement your buy logic here for futures
@@ -118,9 +117,8 @@ def ema_strategy():
                 elif (
     (
         (historical_data['long_ema'].iloc[-2] > historical_data['short_ema'].iloc[-2] and
-        historical_data['long_ema'].iloc[-3] <= historical_data['short_ema'].iloc[-3] and
+        historical_data['long_ema'].iloc[-3] <= historical_data['short_ema'].iloc[-3]) and
         last_order_types[symbol] != 'SELL'
-    )
 ):
                     print(f'{symbol} Sell Signal (Crossunder)')
                     # Implement your sell logic here for futures
