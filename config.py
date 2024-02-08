@@ -44,6 +44,7 @@ symbols = [
     'CFXUSDT', 'TLMUSDT',
     'BAKEUSDT', 'SLPUSDT', 'ICPUSDT', 'ARUSDT', 'MASKUSDT', 'LPTUSDT',
     'XVGUSDT', 'ATAUSDT', 'APTUSDT', 'ARBUSDT'
+, 'DYMUSDT', 'RONINUSDT', 'JUPUSDT', 'ALTUSDT'
 ]
 
 # Time interval for fetching historical data
