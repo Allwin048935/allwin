@@ -107,7 +107,7 @@ def ema_strategy():
         (historical_data['short_ema'].iloc[-2] > historical_data['long_ema'].iloc[-2] and
         historical_data['short_ema'].iloc[-3] <= historical_data['long_ema'].iloc[-3]) and 
         last_order_types[symbol] != 'BUY'
-):
+    ):
                     print(f'{symbol} Buy Signal (Crossover)')
                     # Implement your buy logic here for futures
                     # For example, place a market buy order
@@ -119,7 +119,7 @@ def ema_strategy():
         (historical_data['long_ema'].iloc[-2] > historical_data['short_ema'].iloc[-2] and
         historical_data['long_ema'].iloc[-3] <= historical_data['short_ema'].iloc[-3]) and
         last_order_types[symbol] != 'SELL'
-):
+    ):
                     print(f'{symbol} Sell Signal (Crossunder)')
                     # Implement your sell logic here for futures
                     # For example, place a market sell order
