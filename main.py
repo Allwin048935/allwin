@@ -15,15 +15,15 @@ exchange = ccxt.binance({
 })
 
 # Define EMA strategy parameters
-short_ema_period = 7
-long_ema_period = 100
+short_ema_period = 9
+long_ema_period = 10
 
 # Track the last order type placed for each symbol
 last_order_types = {symbol: None for symbol in symbols}
 open_orders = {symbol: None for symbol in symbols}
 
 # Fixed quantity in USDT worth of contracts
-fixed_quantity_usdt = 20
+fixed_quantity_usdt = 11
 
 # Function to fetch historical data for futures with EMA calculation
 def fetch_ohlcv(symbol, timeframe, limit):
@@ -105,8 +105,7 @@ def ema_strategy():
                 if (
     (
         (historical_data['short_ema'].iloc[-2] > historical_data['long_ema'].iloc[-2] and
-        historical_data['short_ema'].iloc[-3] <= historical_data['long_ema'].iloc[-3] and
-        historical_data['short_ema'].iloc[-4] <= historical_data['long_ema'].iloc[-4]) and 
+        historical_data['short_ema'].iloc[-3] <= historical_data['long_ema'].iloc[-3] and 
         last_order_types[symbol] != 'BUY'
     )
 ):
@@ -120,7 +119,6 @@ def ema_strategy():
     (
         (historical_data['long_ema'].iloc[-2] > historical_data['short_ema'].iloc[-2] and
         historical_data['long_ema'].iloc[-3] <= historical_data['short_ema'].iloc[-3] and
-        historical_data['long_ema'].iloc[-4] <= historical_data['short_ema'].iloc[-4]) and
         last_order_types[symbol] != 'SELL'
     )
 ):
