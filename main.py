@@ -103,7 +103,6 @@ def ema_strategy():
 
                 # Make trading decisions for each symbol
                 if (
-    (
         (historical_data['short_ema'].iloc[-2] > historical_data['long_ema'].iloc[-2] and
         historical_data['short_ema'].iloc[-3] <= historical_data['long_ema'].iloc[-3]) and 
         last_order_types[symbol] != 'BUY'
@@ -115,7 +114,6 @@ def ema_strategy():
                     last_order_types[symbol] = 'BUY'
 
                 elif (
-    (
         (historical_data['long_ema'].iloc[-2] > historical_data['short_ema'].iloc[-2] and
         historical_data['long_ema'].iloc[-3] <= historical_data['short_ema'].iloc[-3]) and
         last_order_types[symbol] != 'SELL'
