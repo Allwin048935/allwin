@@ -125,11 +125,11 @@ def ema_strategy():
                     last_order_types[symbol] = 'SELL'
 
             # Sleep for some time (e.g., 5 minutes) before checking again
-            time.sleep(300)
+            time.sleep(60)
 
         except Exception as e:
             print(f'An error occurred: {e}')
-            time.sleep(300)  # Wait for a minute before trying again
+            time.sleep(60)  # Wait for a minute before trying again
 
 # Run the trading strategy
 ema_strategy()
