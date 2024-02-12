@@ -146,11 +146,11 @@ def ema_strategy():
                     historical_data['short_ema'].iloc[-3] >= historical_data['medium_ema'].iloc[-3] 
                 ):
                     print(f'{symbol} Long Exit Signal')
-                    # Close existing long position if any
-                    if open_positions[symbol] == 'LONG':
+                    # Close existing long position if short EMA crosses down below 1% of long EMA
+                    if (historical_data['short_ema'].iloc[-2] < historical_data['long_ema'].iloc[-2] * 0.99):
                         close_long_position(symbol, quantity)
-                    open_positions[symbol] = None
-                    last_order_types[symbol] = None
+                        open_positions[symbol] = None
+                        last_order_types[symbol] = None
 
                 elif (
                     last_order_types[symbol] != 'SHORT' and
@@ -172,13 +172,13 @@ def ema_strategy():
                     historical_data['short_ema'].iloc[-3] <= historical_data['medium_ema'].iloc[-3] 
                 ):
                     print(f'{symbol} Short Exit Signal')
-                    # Close existing short position if any
-                    if open_positions[symbol] == 'SHORT':
+                    # Close existing short position if short EMA crosses up above -1% of long EMA
+                    if (historical_data['short_ema'].iloc[-2] > historical_data['long_ema'].iloc[-2] * 1.01):
                         close_short_position(symbol, quantity)
-                    open_positions[symbol] = None
-                    last_order_types[symbol] = None
+                        open_positions[symbol] = None
+                        last_order_types[symbol] = None
 
-                    # Sleep for some time (e.g., 5 minutes) before checking again
+            # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(60)
 
         except Exception as e:
