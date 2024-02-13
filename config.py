@@ -1,8 +1,8 @@
 
 # config.py
 
-BINANCE_API_KEY = ''
-BINANCE_API_SECRET = ''
+BINANCE_API_KEY = 'lgfsSlRFZepEWWJixRKk5qND0jrahDyThbpS1Wym7dwf9AliWnqJ37eJKSmwe2M5'
+BINANCE_API_SECRET = 'cs9mPzJFL8bwcJeW1B8gdKGNlO5sKb7U1Y5Ei9sdQVlIdF7yIWDXr0qaKWVb4qxq'
 
 # Telegram API keys
 #TELEGRAM_BOT_TOKEN = 
@@ -47,4 +47,4 @@ symbols = [
 ]
 
 # Time interval for fetching historical data
-time_interval = '15m'  # You can change this to '4h', '1d', etc.
+time_interval = '1m'  # You can change this to '4h', '1d', etc.
