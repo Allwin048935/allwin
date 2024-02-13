@@ -142,8 +142,8 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] == 'LONG' and
-                    (historical_data['short_ema'].iloc[-3] >= (historical_data['long_ema'].iloc[-3]*1.005) and
-                    historical_data['short_ema'].iloc[-2] < (historical_data['long_ema'].iloc[-2]*1.005))
+                    (historical_data['short_ema'].iloc[-3] >= (historical_data['long_ema'].iloc[-3]*1.01) and
+                    historical_data['short_ema'].iloc[-2] < (historical_data['long_ema'].iloc[-2]*1.01))
                 ):
                     print(f'{symbol} Long Exit Signal')
                     # Close existing long position if short EMA crosses below long EMA
@@ -167,8 +167,8 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] == 'SHORT' and
-                    (historical_data['short_ema'].iloc[-3] <= (historical_data['long_ema'].iloc[-3]*0.995) and
-                    historical_data['short_ema'].iloc[-2] > (historical_data['long_ema'].iloc[-2]*0.995))
+                    (historical_data['short_ema'].iloc[-3] <= (historical_data['long_ema'].iloc[-3]*0.99) and
+                    historical_data['short_ema'].iloc[-2] > (historical_data['long_ema'].iloc[-2]*0.99))
                 ):
                     print(f'{symbol} Short Exit Signal')
                     # Close existing short position if short EMA crosses above long EMA
