@@ -123,7 +123,7 @@ def ema_strategy():
                 # Calculate the quantity based on the fixed USDT value
                 quantity = fixed_quantity_usdt / float(latest_open)
 
-                print(f"Symbol: {symbol}, Latest Open: {latest_open}, Quantity: {quantity}")
+                #print(f"Symbol: {symbol}, Latest Open: {latest_open}, Quantity: {quantity}")
 
                 # Calculate short EMA over a 15-minute interval
                 short_ema_15min = calculate_ema(historical_data, short_ema_period, column='close')
