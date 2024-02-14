@@ -20,22 +20,27 @@ long_ema_period = 50
 # Track the last order type placed for each symbol
 last_order_types = {symbol: None for symbol in symbols}
 open_orders = {symbol: None for symbol in symbols}
+open_positions = {symbol: None for symbol in symbols}  # Initialize open_positions
 
 # Fixed quantity in USDT worth of contracts
 fixed_quantity_usdt = 15
 
 # Function to fetch historical data for futures with EMA calculation
 def fetch_ohlcv(symbol, timeframe, limit):
-    ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
-    df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    try:
+        ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
+        df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
-    # Calculate short and long EMAs
-    df['short_ema'] = calculate_ema(df, short_ema_period)
-    df['long_ema'] = calculate_ema(df, long_ema_period)
+        # Calculate short and long EMAs
+        df['short_ema'] = calculate_ema(df, short_ema_period)
+        df['long_ema'] = calculate_ema(df, long_ema_period)
 
-    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-    df.set_index('timestamp', inplace=True)
-    return df
+        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+        df.set_index('timestamp', inplace=True)
+        return df
+    except Exception as e:
+        print(f"Error fetching OHLCV data for {symbol}: {e}")
+        return None
 
 # Function to calculate EMA
 def calculate_ema(df, period, column='close'):
@@ -52,6 +57,7 @@ def place_market_buy_order(symbol, quantity):
         return order
     except Exception as e:
         print(f"Error placing Market Buy Order for {symbol}: {e}")
+        return None
 
 # Function to place a market sell order
 def place_market_sell_order(symbol, quantity):
@@ -64,6 +70,7 @@ def place_market_sell_order(symbol, quantity):
         return order
     except Exception as e:
         print(f"Error placing Market Sell Order for {symbol}: {e}")
+        return None
 
 # Function to close long position
 def close_long_position(symbol, quantity):
@@ -77,6 +84,7 @@ def close_long_position(symbol, quantity):
         return order
     except Exception as e:
         print(f"Error closing Long Position for {symbol}: {e}")
+        return None
 
 # Function to close short position
 def close_short_position(symbol, quantity):
@@ -90,6 +98,7 @@ def close_short_position(symbol, quantity):
         return order
     except Exception as e:
         print(f"Error closing Short Position for {symbol}: {e}")
+        return None
 
 # Main trading function for futures
 def ema_strategy():
@@ -98,6 +107,9 @@ def ema_strategy():
             for symbol in symbols:
                 # Fetch historical data for each symbol with a 15-minute time interval
                 historical_data = fetch_ohlcv(symbol, '15m', 200)
+
+                if historical_data is None:
+                    continue  # Skip to the next symbol if there's an error fetching data
 
                 # Check if there's enough data for EMA calculation
                 if len(historical_data) < long_ema_period:
