@@ -106,7 +106,7 @@ def ema_strategy():
         try:
             for symbol in symbols:
                 # Fetch historical data for each symbol with a 15-minute time interval
-                historical_data = fetch_ohlcv(symbol, '5m', 200)
+                historical_data = fetch_ohlcv(symbol, '5m', 100)
 
                 if historical_data is None:
                     continue  # Skip to the next symbol if there's an error fetching data
@@ -143,8 +143,8 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] == 'BUY' and
-                    short_ema_15min.iloc[-2] < (latest_open*1.005) and
-                    short_ema_15min.iloc[-3] >= (latest_open*1.005)
+                    short_ema_15min.iloc[-2] < (latest_open*1.007) and
+                    short_ema_15min.iloc[-3] >= (latest_open*1.007)
                 ):
                     print(f'{symbol} Long Exit Signal')
                     # Close existing long position if short EMA crosses below long EMA
@@ -166,8 +166,8 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] == 'SELL' and
-                    short_ema_15min.iloc[-2] > (latest_open*0.995) and
-                    short_ema_15min.iloc[-3] <= (latest_open*0.995)
+                    short_ema_15min.iloc[-2] > (latest_open*0.993) and
+                    short_ema_15min.iloc[-3] <= (latest_open*0.993)
                 ):
                     print(f'{symbol} Short Exit Signal')
                     # Close existing short position if short EMA crosses above long EMA
