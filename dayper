@@ -149,6 +149,7 @@ def ema_strategy():
                     # Implement your sell logic here for futures
                     # For example, place a market sell order
                     open_orders[symbol] = place_market_sell_order(symbol, quantity)
+                    open_positions[symbol] = 'SELL'
                     last_order_types[symbol] = 'SELL'
 
                 elif (
