@@ -14,7 +14,7 @@ exchange = ccxt.binance({
 })
 
 # Define EMA strategy parameters
-short_ema_period = 3
+short_ema_period = 5
 long_ema_period = 50
 
 # Track the last order type placed for each symbol
@@ -130,7 +130,7 @@ def ema_strategy():
 
                 # Make trading decisions for each symbol
                 if (
-                    short_ema_15min.iloc[-2] > latest_open and
+                    short_ema_15min.iloc[-2] >= latest_open and
                     short_ema_15min.iloc[-3] <= latest_open and
                     last_order_types[symbol] != 'BUY'
                 ):
@@ -143,7 +143,7 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] == 'BUY' and
-                    short_ema_15min.iloc[-2] < (latest_open*1.006) and
+                    short_ema_15min.iloc[-2] <= (latest_open*1.006) and
                     short_ema_15min.iloc[-3] >= (latest_open*1.006)
                 ):
                     print(f'{symbol} Long Exit Signal')
@@ -153,7 +153,7 @@ def ema_strategy():
                     last_order_types[symbol] = None
 
                 elif (
-                    short_ema_15min.iloc[-2] < latest_open and
+                    short_ema_15min.iloc[-2] <= latest_open and
                     short_ema_15min.iloc[-3] >= latest_open and
                     last_order_types[symbol] != 'SELL'
                 ):
@@ -166,7 +166,7 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] == 'SELL' and
-                    short_ema_15min.iloc[-2] > (latest_open*0.994) and
+                    short_ema_15min.iloc[-2] >= (latest_open*0.994) and
                     short_ema_15min.iloc[-3] <= (latest_open*0.994)
                 ):
                     print(f'{symbol} Short Exit Signal')
@@ -176,11 +176,11 @@ def ema_strategy():
                     last_order_types[symbol] = None
 
             # Sleep for some time (e.g., 5 minutes) before checking again
-            time.sleep(120)
+            time.sleep(60)
 
         except Exception as e:
             print(f'An error occurred: {e}')
-            time.sleep(120)  # Wait for a minute before trying again
+            time.sleep(60)  # Wait for a minute before trying again
 
 # Run the trading strategy
 ema_strategy()
