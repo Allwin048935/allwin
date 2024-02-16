@@ -15,7 +15,7 @@ exchange = ccxt.binance({
 })
 
 # Define EMA strategy parameters
-short_ema_period = 3
+short_ema_period = 9
 long_ema_period = 50
 
 # Track the last order type placed for each symbol
@@ -92,7 +92,7 @@ def ema_strategy():
 
                 # Make trading decisions for each symbol
                 if (
-                    short_ema_15min.iloc[-2] > latest_open and
+                    short_ema_15min.iloc[-2] >= latest_open and
                     short_ema_15min.iloc[-3] <= latest_open and
                     last_order_types[symbol] != 'BUY'
                 ):
@@ -103,7 +103,7 @@ def ema_strategy():
                     last_order_types[symbol] = 'BUY'
 
                 elif (
-                    short_ema_15min.iloc[-2] < latest_open and
+                    short_ema_15min.iloc[-2] <= latest_open and
                     short_ema_15min.iloc[-3] >= latest_open and
                     last_order_types[symbol] != 'SELL'
                 ):
