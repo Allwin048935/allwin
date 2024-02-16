@@ -30,7 +30,7 @@ def main():
             # Get previous day's balance from file or database
             # For simplicity, let's assume we have a variable named 'previous_day_balance'
             # Replace it with your method to fetch previous day's balance
-            previous_balance = 10000  # Replace this with the actual previous day's balance
+            previous_balance = 100  # Replace this with the actual previous day's balance
 
 
             # Calculate the percentage change
