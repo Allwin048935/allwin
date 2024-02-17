@@ -12,46 +12,55 @@ binance = ccxt.binance({
 # Initialize Telegram Bot
 telegram_bot = Bot(token=TELEGRAM_BOT_TOKEN)
 
-# Function to fetch future wallet balance
-def get_future_wallet_balance():
+# Function to fetch margin wallet balance
+def get_margin_wallet_balance():
     try:
-        balance = binance.fetch_balance()
-        total_usdt = balance['total'].get('USDT', 0)
-        print("Current balance:", total_usdt)
-        return total_usdt
+        balance = binance.fetch_balance(params={"type": "margin"})
+        total_balance = balance['total']
+        margin_balance = total_balance.get('USDT', 0)  # Assuming margin balance is represented in USDT
+        print("Current margin balance:", margin_balance)
+        return margin_balance
     except Exception as e:
-        print("Error fetching balance:", e)
-        return 0  # Return 0 in case of an error
+        print("Error fetching margin balance:", e)
+        return None  # Return None in case of an error
 
 # Main function (now defined as async)
 async def main():
     try:
-        previous_balance = 100  # Initialize with a fixed value of 100 USDT
+        previous_balance = None  # Initialize with None
 
         while True:
-            current_balance = get_future_wallet_balance()
+            current_balance = get_margin_wallet_balance()
+
+            # Check if the initial balance is fetched successfully
+            if previous_balance is None:
+                if current_balance is None:
+                    # Retry fetching balance
+                    await asyncio.sleep(5)  # Wait for 5 seconds before retrying
+                    continue
+                else:
+                    previous_balance = current_balance
+                    print("Initial margin balance set:", previous_balance)
+                    await asyncio.sleep(5)  # Wait for 5 seconds before the next iteration
+                    continue
 
             # Debug print statements
-            print("Previous balance:", previous_balance)
-            print("Current balance:", current_balance)
+            print("Previous margin balance:", previous_balance)
+            print("Current margin balance:", current_balance)
 
-            # Calculate the percentage change
+            # Calculate the percentage change if previous balance is not None
             percentage_change = ((current_balance - previous_balance) / previous_balance) * 100
             print("Percentage change:", percentage_change)
 
-            # Check if the previous balance is zero (for the first iteration)
-            if previous_balance == 0:
-                print("First iteration, no percentage change calculation.")
-            else:
-                # Check if the percentage change is greater than or equal to 5%
-                if percentage_change >= 5:
-                    # Debug print statement
-                    print("Sending alert...")
+            # Check if the percentage change is greater than or equal to 5%
+            if percentage_change >= 5:
+                # Debug print statement
+                print("Sending alert...")
 
-                    # Send an alert if the condition is met
-                    message = f"Alert: Balance increased by {percentage_change:.2f}% since the last check."
-                    await send_telegram_message(message)  # Await the function call
-                    print("Alert sent successfully.")
+                # Send an alert if the condition is met
+                message = f"Alert: Margin balance increased by {percentage_change:.2f}% since the last check."
+                await send_telegram_message(message)  # Await the function call
+                print("Alert sent successfully.")
 
             previous_balance = current_balance  # Update previous balance
 
@@ -67,4 +76,3 @@ async def send_telegram_message(message):
 # Run the main function
 if __name__ == "__main__":
     asyncio.run(main())
-
