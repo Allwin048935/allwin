@@ -11,12 +11,12 @@ client = Client(api_key, api_secret)
 # Function to get future account balance
 def get_future_balance():
     try:
-        futures_account = client.futures_account()
-        balances = futures_account['assets']
-        for balance in balances:
-            asset = balance['asset']
-            balance = balance['walletBalance']
-            print(f"{asset}: {balance}")
+        futures_account = client.futures_account_v2()
+        assets = futures_account['assets']
+        for asset in assets:
+            asset_name = asset['asset']
+            balance = asset['walletBalance']
+            print(f"{asset_name}: {balance}")
     except Exception as e:
         print("An error occurred:", e)
 
