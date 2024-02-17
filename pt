@@ -27,7 +27,7 @@ def get_margin_balance():
 # Main function (now defined as async)
 async def main():
     try:
-        previous_balance = None  # Initialize with None
+        previous_balance = 100  # Initialize with None
 
         while True:
             current_balance = get_margin_wallet_balance()
