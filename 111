@@ -39,21 +39,25 @@ def get_future_balance(api_key, api_secret):
             for asset in assets:
                 asset_name = asset['asset']
                 balance = float(asset['walletBalance'])
-                print(f"{asset_name}: {balance}")
+                yield asset_name, balance
         else:
             print("Failed to fetch future account balances:", data)
     except Exception as e:
         print("An error occurred:", e)
 
+# Function to monitor balance increase
+def monitor_balance_increase(api_key, api_secret):
+    prev_fixed_balance = 100.0  # Fixed initial balance
+    while True:
+        for asset, balance in get_future_balance(api_key, api_secret):
+            if balance > prev_fixed_balance * 1.05:  # Increased by 5% compared to fixed balance
+                print(f"{asset}: Balance increased by 5% compared to $100 USDT")
+        time.sleep(5)  # Wait for 5 seconds before checking again
+
 # Main function to run the bot
 def main():
-    while True:
-        # Get future account balance
-        print("Current Future Balances:")
-        get_future_balance(api_key, api_secret)
-        
-        # Wait for 5 seconds before fetching balances again
-        time.sleep(5)
+    print("Monitoring Future Balances for increase by 5% compared to $100 USDT:")
+    monitor_balance_increase(api_key, api_secret)
 
 if __name__ == "__main__":
     main()
