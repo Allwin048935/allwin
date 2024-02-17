@@ -24,10 +24,9 @@ async def send_telegram_message(message):
 # Main function (now defined as async)
 async def main():
     try:
-        previous_balance = get_account_balance()
-
         while True:
             current_balance = get_account_balance()
+            previous_balance = 100
 
             # Calculate the percentage change
             percentage_change = ((current_balance - previous_balance) / previous_balance) * 100
