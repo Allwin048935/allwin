@@ -1,8 +1,8 @@
 from binance.client import Client
 
 # Replace 'YOUR_API_KEY' and 'YOUR_API_SECRET' with your actual Binance API key and secret
-api_key = 'YOUR_API_KEY'
-api_secret = 'YOUR_API_SECRET'
+api_key = 'cOmCONWJRpxWr9XGwwJoKPLQSWeWIwMjoobgqXKG6cqO6GmtIaXdsMEjsHXJcNQU'
+api_secret = 'AC4x9ihiOezuEtqz0lRcO5QOHgGQUwFZ3TOyJw38SXmsePIM1KmNWeVYw0H4nXO2'
 
 # Initialize the Binance client
 client = Client(api_key, api_secret)
