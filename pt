@@ -30,15 +30,23 @@ async def main():
         while True:
             current_balance = get_future_wallet_balance()
 
+            # Debug print statements
+            print("Previous balance:", previous_balance)
+            print("Current balance:", current_balance)
+
+            # Calculate the percentage change
+            percentage_change = ((current_balance - previous_balance) / previous_balance) * 100
+            print("Percentage change:", percentage_change)
+
             # Check if the previous balance is zero (for the first iteration)
             if previous_balance == 0:
                 print("First iteration, no percentage change calculation.")
             else:
-                # Calculate the percentage change
-                percentage_change = ((current_balance - previous_balance) / previous_balance) * 100
-
                 # Check if the percentage change is greater than or equal to 5%
                 if percentage_change >= 5:
+                    # Debug print statement
+                    print("Sending alert...")
+
                     # Send an alert if the condition is met
                     message = f"Alert: Balance increased by {percentage_change:.2f}% since the last check."
                     await send_telegram_message(message)  # Await the function call
@@ -58,3 +66,4 @@ async def send_telegram_message(message):
 # Run the main function
 if __name__ == "__main__":
     asyncio.run(main())
+
