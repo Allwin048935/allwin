@@ -30,10 +30,12 @@ def get_future_balance(api_key, api_secret):
         
         # Add API key, timestamp, and signature to request headers
         timestamp = int(time.time() * 1000)
+        recv_window = 10000  # Adjust the value as needed, in milliseconds
         query_string = urllib.parse.urlencode({'timestamp': timestamp})
         signature = generate_signature(query_string)
         headers = {
             'X-MBX-APIKEY': api_key,
+            'recvWindow': str(recv_window)  # Convert recvWindow to string
         }
         
         # Send request
@@ -70,9 +72,9 @@ def monitor_balance_increase(api_key, api_secret):
         for asset, balance in get_future_balance(api_key, api_secret):
             percentage_increase = ((balance - prev_fixed_balance) / prev_fixed_balance) * 100
             if percentage_increase == 0:
-                message = f"{asset}: Balance remains unchanged compared to $100 USDT"
-            elif percentage_increase > 5:  # Increased by more than 5% compared to fixed balance
-                message = f"{asset}: Balance increased by {percentage_increase:.2f}% compared to $100 USDT"
+                message = f"{asset}: Balance $100 USDT"
+            elif percentage_increase >= 5:  # Increased by more than 5% compared to fixed balance
+                message = f"{asset}: increased by {percentage_increase:.2f}% "
             else:
                 continue
             
