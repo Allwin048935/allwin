@@ -1,0 +1,34 @@
+from binance.client import Client
+import time
+
+# Binance API keys
+api_key = 'your_api_key'
+api_secret = 'your_api_secret'
+
+# Initialize Binance client
+client = Client(api_key, api_secret)
+
+# Function to get future account balance
+def get_future_balance():
+    try:
+        futures_account = client.futures_account()
+        balances = futures_account['assets']
+        for balance in balances:
+            asset = balance['asset']
+            balance = balance['walletBalance']
+            print(f"{asset}: {balance}")
+    except Exception as e:
+        print("An error occurred:", e)
+
+# Main function to run the bot
+def main():
+    while True:
+        # Get future account balance
+        print("Current Future Balances:")
+        get_future_balance()
+        
+        # Wait for 5 seconds before fetching balances again
+        time.sleep(5)
+
+if __name__ == "__main__":
+    main()
