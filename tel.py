@@ -1,21 +1,21 @@
 # main_script.py
 
-import ccxt
-import pandas as pd
-from ta.trend import ema_indicator
-import asyncio
-import nest_asyncio
-from telegram import Bot
-from config import symbols  # Import symbols from config.py
+#import ccxt
+#import pandas as pd
+#from ta.trend import ema_indicator
+#import asyncio
+#import nest_asyncio
+#from telegram import Bot
+#from config import symbols  # Import symbols from config.py
 
 # Binance API credentials
-api_key = '0nzlZCz4ud1jML1hQRRklusBi9DybWkE7bWS2fwO16e4gAF5tG4ot2o3GwLQefqs'
-api_secret = 'xcKEebmuG1JmPLsoeRODFtAmaAm2pgIofgDSTI2LTDeixkJZb9G0jSpT6zQkjlT7'
+api_key = ''
+api_secret = ''
 interval = '15m'  # 1-day candlesticks
 
 # Telegram Bot Token and Chat ID
-telegram_token = '6811110812:AAFNJp5kcSh0KZ71Yizf8Y3rPBarz-ywopM'
-chat_id = '1385370555'
+telegram_token = ''
+chat_id = ''
 
 # Initialize Binance client
 binance = ccxt.binance({
