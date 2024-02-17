@@ -13,7 +13,7 @@ binance = ccxt.binance({
 telegram_bot = Bot(token=TELEGRAM_BOT_TOKEN)
 
 # Function to fetch margin wallet balance
-def get_margin_wallet_balance():
+def get_margin_balance():
     try:
         balance = binance.fetch_balance(params={"type": "margin"})
         total_balance = balance['total']
