@@ -6,12 +6,12 @@ import hmac
 import urllib.parse
 
 # Binance API keys
-api_key = 'cOmCONWJRpxWr9XGwwJoKPLQSWeWIwMjoobgqXKG6cqO6GmtIaXdsMEjsHXJcNQU'
-api_secret = 'AC4x9ihiOezuEtqz0lRcO5QOHgGQUwFZ3TOyJw38SXmsePIM1KmNWeVYw0H4nXO2'
+api_key = ''
+api_secret = ''
 
 # Telegram bot token and chat ID
-telegram_bot_token = '6811110812:AAFNJp5kcSh0KZ71Yizf8Y3rPBarz-ywopM'
-telegram_chat_id = '1385370555'
+telegram_bot_token = ''
+telegram_chat_id = ''
 
 # Variable to store the last message sent
 last_message = {}
