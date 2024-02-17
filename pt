@@ -12,53 +12,40 @@ binance = ccxt.binance({
 # Initialize Telegram Bot
 telegram_bot = Bot(token=TELEGRAM_BOT_TOKEN)
 
-# Function to fetch margin wallet balance
-def get_margin_balance():
-    try:
-        balance = binance.fetch_balance(params={"type": "margin"})
-        total_balance = balance['total']
-        margin_balance = total_balance.get('USDT', 0)  # Assuming margin balance is represented in USDT
-        print("Current margin balance:", margin_balance)
-        return margin_balance
-    except Exception as e:
-        print("Error fetching margin balance:", e)
-        return None  # Return None in case of an error
+# Function to fetch overall account balance
+def get_overall_account_balance():
+    balance = binance.fetch_balance()
+    total_balance = 0
+    for asset, amount in balance['total'].items():
+        if amount > 0:  # Exclude assets with zero balance
+            if asset == 'USDT':  # Convert USDT to USD for consistency
+                total_balance += amount
+            else:
+                # Convert non-USDT assets to their equivalent in USD using the last market price
+                market_price = binance.fetch_ticker(f'{asset}/USDT')['last']
+                asset_balance_in_usdt = amount * market_price
+                total_balance += asset_balance_in_usdt
+    return total_balance
+
+# Function to send Telegram message (now defined as async)
+async def send_telegram_message(message):
+    await telegram_bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
 
 # Main function (now defined as async)
 async def main():
     try:
-        previous_balance = 100  # Initialize with None
+        previous_balance = 100  # Initialize previous balance
 
         while True:
-            current_balance = get_margin_balance()
+            current_balance = get_overall_account_balance()
 
-            # Check if the initial balance is fetched successfully
-            if previous_balance is None:
-                if current_balance is None:
-                    # Retry fetching balance
-                    await asyncio.sleep(5)  # Wait for 5 seconds before retrying
-                    continue
-                else:
-                    previous_balance = current_balance
-                    print("Initial margin balance set:", previous_balance)
-                    await asyncio.sleep(5)  # Wait for 5 seconds before the next iteration
-                    continue
-
-            # Debug print statements
-            print("Previous margin balance:", previous_balance)
-            print("Current margin balance:", current_balance)
-
-            # Calculate the percentage change if previous balance is not None
+            # Calculate the percentage change
             percentage_change = ((current_balance - previous_balance) / previous_balance) * 100
-            print("Percentage change:", percentage_change)
 
             # Check if the percentage change is greater than or equal to 5%
             if percentage_change >= 5:
-                # Debug print statement
-                print("Sending alert...")
-
                 # Send an alert if the condition is met
-                message = f"Alert: Margin balance increased by {percentage_change:.2f}% since the last check."
+                message = f"Alert: Balance increased by {percentage_change:.2f}% since the last check."
                 await send_telegram_message(message)  # Await the function call
                 print("Alert sent successfully.")
 
@@ -69,10 +56,7 @@ async def main():
     except Exception as e:
         print(f"Error fetching or sending alert: {e}")
 
-# Function to send Telegram message (now defined as async)
-async def send_telegram_message(message):
-    await telegram_bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
-
 # Run the main function
 if __name__ == "__main__":
     asyncio.run(main())
+
