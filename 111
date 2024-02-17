@@ -13,6 +13,9 @@ api_secret = 'AC4x9ihiOezuEtqz0lRcO5QOHgGQUwFZ3TOyJw38SXmsePIM1KmNWeVYw0H4nXO2'
 telegram_bot_token = '6811110812:AAFNJp5kcSh0KZ71Yizf8Y3rPBarz-ywopM'
 telegram_chat_id = '1385370555'
 
+# Variable to store the last message sent
+last_message = {}
+
 # Function to create signature for request
 def generate_signature(data):
     return hmac.new(api_secret.encode('utf-8'), data.encode('utf-8'), hashlib.sha256).hexdigest()
@@ -62,18 +65,27 @@ def send_telegram_message(message):
 # Function to monitor balance increase
 def monitor_balance_increase(api_key, api_secret):
     prev_fixed_balance = 100.0  # Fixed initial balance
+    global last_message
     while True:
         for asset, balance in get_future_balance(api_key, api_secret):
-            if balance > prev_fixed_balance * 1.05:  # Increased by 5% compared to fixed balance
-                percentage_increase = ((balance - prev_fixed_balance) / prev_fixed_balance) * 100
+            percentage_increase = ((balance - prev_fixed_balance) / prev_fixed_balance) * 100
+            if percentage_increase == 0:
+                message = f"{asset}: Balance remains unchanged compared to $100 USDT"
+            elif percentage_increase > 5:  # Increased by more than 5% compared to fixed balance
                 message = f"{asset}: Balance increased by {percentage_increase:.2f}% compared to $100 USDT"
+            else:
+                continue
+            
+            if last_message.get(asset) != message:
                 print(message)
                 send_telegram_message(message)
+                last_message[asset] = message
+                
         time.sleep(5)  # Wait for 5 seconds before checking again
 
 # Main function to run the bot
 def main():
-    print("Monitoring Future Balances for increase by 5% compared to $100 USDT:")
+    print("Monitoring Future Balances for increase or no change compared to $100 USDT:")
     monitor_balance_increase(api_key, api_secret)
 
 if __name__ == "__main__":
