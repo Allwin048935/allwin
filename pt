@@ -30,7 +30,7 @@ async def main():
         previous_balance = 100  # Initialize with None
 
         while True:
-            current_balance = get_margin_wallet_balance()
+            current_balance = get_margin_balance()
 
             # Check if the initial balance is fetched successfully
             if previous_balance is None:
