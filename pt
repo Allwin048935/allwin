@@ -17,6 +17,7 @@ def get_future_wallet_balance():
     try:
         balance = binance.fetch_balance()
         total_usdt = balance['total'].get('USDT', 0)
+        print("Current balance:", total_usdt)
         return total_usdt
     except Exception as e:
         print("Error fetching balance:", e)
