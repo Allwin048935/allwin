@@ -14,29 +14,35 @@ telegram_bot = Bot(token=TELEGRAM_BOT_TOKEN)
 
 # Function to fetch future wallet balance
 def get_future_wallet_balance():
-    balance = binance.fetch_balance()
-    return balance['total']['USDT']
+    try:
+        balance = binance.fetch_balance()
+        total_usdt = balance['total'].get('USDT', 0)
+        return total_usdt
+    except Exception as e:
+        print("Error fetching balance:", e)
+        return 0  # Return 0 in case of an error
 
 # Main function (now defined as async)
 async def main():
     try:
-        previous_balance = 100
+        previous_balance = 100  # Initialize with a fixed value of 100 USDT
+
         while True:
             current_balance = get_future_wallet_balance()
-
-            # Calculate the percentage change
-            percentage_change = ((current_balance - previous_balance) / previous_balance) * 100
 
             # Check if the previous balance is zero (for the first iteration)
             if previous_balance == 0:
                 print("First iteration, no percentage change calculation.")
+            else:
+                # Calculate the percentage change
+                percentage_change = ((current_balance - previous_balance) / previous_balance) * 100
 
-            # Check if the percentage change is greater than or equal to 5%
-            elif percentage_change >= 5:
-                # Send an alert if the condition is met
-                message = f"Alert: Balance increased by {percentage_change:.2f}% since the last check."
-                await send_telegram_message(message)  # Await the function call
-                print("Alert sent successfully.")
+                # Check if the percentage change is greater than or equal to 5%
+                if percentage_change >= 5:
+                    # Send an alert if the condition is met
+                    message = f"Alert: Balance increased by {percentage_change:.2f}% since the last check."
+                    await send_telegram_message(message)  # Await the function call
+                    print("Alert sent successfully.")
 
             previous_balance = current_balance  # Update previous balance
 
@@ -44,6 +50,10 @@ async def main():
 
     except Exception as e:
         print(f"Error fetching or sending alert: {e}")
+
+# Function to send Telegram message (now defined as async)
+async def send_telegram_message(message):
+    await telegram_bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
 
 # Run the main function
 if __name__ == "__main__":
