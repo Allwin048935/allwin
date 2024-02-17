@@ -1,3 +1,8 @@
+import ccxt
+import asyncio
+from config import BINANCE_API_KEY, BINANCE_API_SECRET, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+from telegram import Bot
+
 # Initialize Binance client
 binance = ccxt.binance({
     'apiKey': BINANCE_API_KEY,
