@@ -1,60 +1,30 @@
-import ccxt
+import ccxt.async_support as ccxt  # Importing asynchronous version of ccxt
 import asyncio
-from config import BINANCE_API_KEY, BINANCE_API_SECRET, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
-from telegram import Bot
+import os
 
 # Initialize Binance client
+api_key = os.environ.get('BINANCE_API_KEY')
+api_secret = os.environ.get('BINANCE_API_SECRET')
+
 binance = ccxt.binance({
-    'apiKey': BINANCE_API_KEY,
-    'secret': BINANCE_API_SECRET,
+    'apiKey': api_key,
+    'secret': api_secret,
 })
 
-# Initialize Telegram Bot
-telegram_bot = Bot(token=TELEGRAM_BOT_TOKEN)
-
-# Function to fetch overall account balance
-def get_overall_account_balance():
-    balance = binance.fetch_balance()
-    total_balance = 0
-    for asset, amount in balance['total'].items():
-        if amount > 0:  # Exclude assets with zero balance
-            if asset == 'USDT':  # Convert USDT to USD for consistency
-                total_balance += amount
-            else:
-                # Convert non-USDT assets to their equivalent in USD using the last market price
-                market_price = binance.fetch_ticker(f'{asset}/USDT')['last']
-                asset_balance_in_usdt = amount * market_price
-                total_balance += asset_balance_in_usdt
-    return total_balance
-
-# Function to send Telegram message (now defined as async)
-async def send_telegram_message(message):
-    await telegram_bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
+# Function to fetch futures account balance
+async def get_futures_account_balance():
+    futures_balance = await binance.fetch_balance(params={'type': 'future'})
+    return futures_balance
 
 # Main function (now defined as async)
 async def main():
     try:
-        previous_balance = 100  # Initialize previous balance
-
-        while True:
-            current_balance = get_overall_account_balance()
-
-            # Calculate the percentage change
-            percentage_change = ((current_balance - previous_balance) / previous_balance) * 100
-
-            # Check if the percentage change is greater than or equal to 5%
-            if percentage_change >= 5:
-                # Send an alert if the condition is met
-                message = f"Alert: Balance increased by {percentage_change:.2f}% since the last check."
-                await send_telegram_message(message)  # Await the function call
-                print("Alert sent successfully.")
-
-            previous_balance = current_balance  # Update previous balance
-
-            await asyncio.sleep(5)  # Sleep for 5 seconds before the next iteration
+        futures_balance = await get_futures_account_balance()
+        print("Futures Account Balance:")
+        print(futures_balance)
 
     except Exception as e:
-        print(f"Error fetching or sending alert: {e}")
+        print(f"Error fetching futures account balance: {e}")
 
 # Run the main function
 if __name__ == "__main__":
