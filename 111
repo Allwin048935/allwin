@@ -1,10 +1,17 @@
 import requests
 import json
 import time
+import hashlib
+import hmac
+import urllib.parse
 
 # Binance API keys
 api_key = 'cOmCONWJRpxWr9XGwwJoKPLQSWeWIwMjoobgqXKG6cqO6GmtIaXdsMEjsHXJcNQU'
 api_secret = 'AC4x9ihiOezuEtqz0lRcO5QOHgGQUwFZ3TOyJw38SXmsePIM1KmNWeVYw0H4nXO2'
+
+# Function to create signature for request
+def generate_signature(data):
+    return hmac.new(api_secret.encode('utf-8'), data.encode('utf-8'), hashlib.sha256).hexdigest()
 
 # Function to get future account balance
 def get_future_balance(api_key, api_secret):
@@ -14,13 +21,16 @@ def get_future_balance(api_key, api_secret):
         endpoint = '/fapi/v2/account'
         url = base_url + endpoint
         
-        # Add API key and signature to request headers
+        # Add API key, timestamp, and signature to request headers
+        timestamp = int(time.time() * 1000)
+        query_string = urllib.parse.urlencode({'timestamp': timestamp})
+        signature = generate_signature(query_string)
         headers = {
             'X-MBX-APIKEY': api_key,
         }
         
         # Send request
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, params={'timestamp': timestamp, 'signature': signature})
         data = response.json()
         
         # Parse response
