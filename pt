@@ -1,6 +1,6 @@
-import ccxt.async_support as ccxt  # Importing asynchronous version of ccxt
-import asyncio
-import os
+#import ccxt.async_support as ccxt  # Importing asynchronous version of ccxt
+#import asyncio
+#import os
 
 # Initialize Binance client
 api_key = os.environ.get('BINANCE_API_KEY')
