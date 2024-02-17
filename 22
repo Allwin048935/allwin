@@ -12,4 +12,4 @@ account_info = client.futures_account()
 
 # Iterate over balances
 for asset in account_info['assets']:
-    print(f"{asset['asset']}: {asset['walletBalance']}")  # Printing asset and balance
+    print(f"{asset['asset']}: {asset['walletBalance']}")  # P
