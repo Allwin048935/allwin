@@ -1,22 +1,37 @@
-from binance.client import Client
+import requests
+import json
 import time
 
 # Binance API keys
 api_key = 'cOmCONWJRpxWr9XGwwJoKPLQSWeWIwMjoobgqXKG6cqO6GmtIaXdsMEjsHXJcNQU'
 api_secret = 'AC4x9ihiOezuEtqz0lRcO5QOHgGQUwFZ3TOyJw38SXmsePIM1KmNWeVYw0H4nXO2'
 
-# Initialize Binance client
-client = Client(api_key, api_secret)
-
 # Function to get future account balance
-def get_future_balance():
+def get_future_balance(api_key, api_secret):
     try:
-        futures_account = client.futures_account()
-        assets = futures_account['assets']
-        for asset in assets:
-            asset_name = asset['asset']
-            balance = asset['walletBalance']
-            print(f"{asset_name}: {balance}")
+        # Construct request URL
+        base_url = 'https://fapi.binance.com'
+        endpoint = '/fapi/v2/account'
+        url = base_url + endpoint
+        
+        # Add API key and signature to request headers
+        headers = {
+            'X-MBX-APIKEY': api_key,
+        }
+        
+        # Send request
+        response = requests.get(url, headers=headers)
+        data = response.json()
+        
+        # Parse response
+        if 'assets' in data:
+            assets = data['assets']
+            for asset in assets:
+                asset_name = asset['asset']
+                balance = float(asset['walletBalance'])
+                print(f"{asset_name}: {balance}")
+        else:
+            print("Failed to fetch future account balances:", data)
     except Exception as e:
         print("An error occurred:", e)
 
@@ -25,7 +40,7 @@ def main():
     while True:
         # Get future account balance
         print("Current Future Balances:")
-        get_future_balance()
+        get_future_balance(api_key, api_secret)
         
         # Wait for 5 seconds before fetching balances again
         time.sleep(5)
