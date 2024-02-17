@@ -71,7 +71,7 @@ def monitor_balance_increase(api_key, api_secret):
     while True:
         for asset, balance in get_future_balance(api_key, api_secret):
             percentage_increase = ((balance - prev_fixed_balance) / prev_fixed_balance) * 100
-            if percentage_increase == 0:
+            if percentage_increase =< 0:
                 message = f"{asset}: Balance $100 USDT"
             elif percentage_increase >= 5:  # Increased by more than 5% compared to fixed balance
                 message = f"{asset}: increased by {percentage_increase:.2f}% "
