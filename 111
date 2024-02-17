@@ -9,6 +9,10 @@ import urllib.parse
 api_key = 'cOmCONWJRpxWr9XGwwJoKPLQSWeWIwMjoobgqXKG6cqO6GmtIaXdsMEjsHXJcNQU'
 api_secret = 'AC4x9ihiOezuEtqz0lRcO5QOHgGQUwFZ3TOyJw38SXmsePIM1KmNWeVYw0H4nXO2'
 
+# Telegram bot token and chat ID
+telegram_bot_token = '6811110812:AAFNJp5kcSh0KZ71Yizf8Y3rPBarz-ywopM'
+telegram_chat_id = '1385370555'
+
 # Function to create signature for request
 def generate_signature(data):
     return hmac.new(api_secret.encode('utf-8'), data.encode('utf-8'), hashlib.sha256).hexdigest()
@@ -45,13 +49,25 @@ def get_future_balance(api_key, api_secret):
     except Exception as e:
         print("An error occurred:", e)
 
+# Function to send message to Telegram
+def send_telegram_message(message):
+    url = f"https://api.telegram.org/bot{telegram_bot_token}/sendMessage"
+    data = {
+        "chat_id": telegram_chat_id,
+        "text": message
+    }
+    response = requests.post(url, data=data)
+    return response.json()
+
 # Function to monitor balance increase
 def monitor_balance_increase(api_key, api_secret):
     prev_fixed_balance = 100.0  # Fixed initial balance
     while True:
         for asset, balance in get_future_balance(api_key, api_secret):
             if balance > prev_fixed_balance * 1.05:  # Increased by 5% compared to fixed balance
-                print(f"{asset}: Balance increased by 5% compared to $100 USDT")
+                message = f"{asset}: Balance increased by 5% compared to $100 USDT"
+                print(message)
+                send_telegram_message(message)
         time.sleep(5)  # Wait for 5 seconds before checking again
 
 # Main function to run the bot
