@@ -17,14 +17,10 @@ def get_future_wallet_balance():
     balance = binance.fetch_balance()
     return balance['total']['USDT']
 
-# Function to send Telegram message (now defined as async)
-async def send_telegram_message(message):
-    await telegram_bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
-
 # Main function (now defined as async)
 async def main():
     try:
-        previous_balance = 100  # Moved outside the loop
+        previous_balance = get_future_wallet_balance()  # Initialize with the current balance
 
         while True:
             current_balance = get_future_wallet_balance()
@@ -32,8 +28,12 @@ async def main():
             # Calculate the percentage change
             percentage_change = ((current_balance - previous_balance) / previous_balance) * 100
 
+            # Check if the previous balance is zero (for the first iteration)
+            if previous_balance == 0:
+                print("First iteration, no percentage change calculation.")
+
             # Check if the percentage change is greater than or equal to 5%
-            if percentage_change >= 5:
+            elif percentage_change >= 5:
                 # Send an alert if the condition is met
                 message = f"Alert: Balance increased by {percentage_change:.2f}% since the last check."
                 await send_telegram_message(message)  # Await the function call
