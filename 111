@@ -11,7 +11,7 @@ client = Client(api_key, api_secret)
 # Function to get future account balance
 def get_future_balance():
     try:
-        futures_account = client.futures_account_v2()
+        futures_account = client.futures_account()
         assets = futures_account['assets']
         for asset in assets:
             asset_name = asset['asset']
