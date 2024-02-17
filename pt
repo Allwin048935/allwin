@@ -20,7 +20,7 @@ def get_future_wallet_balance():
 # Main function (now defined as async)
 async def main():
     try:
-        previous_balance = get_future_wallet_balance()  # Initialize with the current balance
+        previous_balance = 100  # Initialize with the current balance
 
         while True:
             current_balance = get_future_wallet_balance()
