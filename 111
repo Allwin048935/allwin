@@ -65,7 +65,8 @@ def monitor_balance_increase(api_key, api_secret):
     while True:
         for asset, balance in get_future_balance(api_key, api_secret):
             if balance > prev_fixed_balance * 1.05:  # Increased by 5% compared to fixed balance
-                message = f"{asset}: Balance increased by 5% compared to $100 USDT"
+                percentage_increase = ((balance - prev_fixed_balance) / prev_fixed_balance) * 100
+                message = f"{asset}: Balance increased by {percentage_increase:.2f}% compared to $100 USDT"
                 print(message)
                 send_telegram_message(message)
         time.sleep(5)  # Wait for 5 seconds before checking again
