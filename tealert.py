@@ -76,7 +76,7 @@ def monitor_balance(api_key, api_secret):
                 send_telegram_message(message)
                 last_message[asset] = message
                 prev_balances[asset] = balance
-        time.sleep(300)  # Wait for 5 seconds before checking again
+        time.sleep(5)  # Wait for 5 seconds before checking again
 
 # Main function to run the bot
 def main():
