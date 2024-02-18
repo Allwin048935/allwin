@@ -80,8 +80,8 @@ def monitor_balance(api_key, api_secret):
 
 # Main function to run the bot
 def main():
-    print("Monitoring Future Balances for increase or no change compared to $100 USDT:")
-    monitor_balance_increase(api_key, api_secret)
+    print("Monitoring Future Balances for changes:")
+    monitor_balance(api_key, api_secret)
 
 if __name__ == "__main__":
     main()
