@@ -71,19 +71,23 @@ def monitor_balance_increase(api_key, api_secret):
     while True:
         for asset, balance in get_future_balance(api_key, api_secret):
             percentage_increase = ((balance - prev_fixed_balance) / prev_fixed_balance) * 100
-            if percentage_increase >= 5:  # Increased by more than 5% compared to fixed balance
+            if percentage_increase <= 0:
+                message = f"{asset}: Balance $100 USDT"
+            elif percentage_increase >= 5:  # Increased by more than 5% compared to fixed balance
                 message = f"{asset}: increased by {percentage_increase:.2f}% "
-                
-                if last_message.get(asset) != message:
-                    print(message)
-                    send_telegram_message(message)
-                    last_message[asset] = message
+            else:
+                continue
+            
+            if last_message.get(asset) != message:
+                print(message)
+                send_telegram_message(message)
+                last_message[asset] = message
                 
         time.sleep(300)  # Wait for 5 seconds before checking again
 
 # Main function to run the bot
 def main():
-    print("Monitoring Future Balances for increase compared to $100 USDT:")
+    print("Monitoring Future Balances for increase or no change compared to $100 USDT:")
     monitor_balance_increase(api_key, api_secret)
 
 if __name__ == "__main__":
