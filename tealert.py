@@ -64,25 +64,18 @@ def send_telegram_message(message):
     response = requests.post(url, data=data)
     return response.json()
 
-# Function to monitor balance increase
-def monitor_balance_increase(api_key, api_secret):
-    prev_fixed_balance = 100.0  # Fixed initial balance
+# Function to monitor balance changes
+def monitor_balance(api_key, api_secret):
+    prev_balances = {}  # Dictionary to store previous balances
     global last_message
     while True:
         for asset, balance in get_future_balance(api_key, api_secret):
-            percentage_increase = ((balance - prev_fixed_balance) / prev_fixed_balance) * 100
-            if percentage_increase <= 0:
-                message = f"{asset}: Balance $100 USDT"
-            elif percentage_increase >= 5:  # Increased by more than 5% compared to fixed balance
-                message = f"{asset}: increased by {percentage_increase:.2f}% "
-            else:
-                continue
-            
-            if last_message.get(asset) != message:
+            if prev_balances.get(asset) != balance:
+                message = f"{asset}: Balance ${balance:.2f} USDT"
                 print(message)
                 send_telegram_message(message)
                 last_message[asset] = message
-                
+                prev_balances[asset] = balance
         time.sleep(300)  # Wait for 5 seconds before checking again
 
 # Main function to run the bot
