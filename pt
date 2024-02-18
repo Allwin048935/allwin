@@ -1,32 +1,90 @@
-#import ccxt.async_support as ccxt  # Importing asynchronous version of ccxt
-#import asyncio
-#import os
+import requests
+import json
+import time
+import hashlib
+import hmac
+import urllib.parse
 
-# Initialize Binance client
-api_key = os.environ.get('BINANCE_API_KEY')
-api_secret = os.environ.get('BINANCE_API_SECRET')
+# Binance API keys
+api_key = ''
+api_secret = ''
 
-binance = ccxt.binance({
-    'apiKey': api_key,
-    'secret': api_secret,
-})
+# Telegram bot token and chat ID
+telegram_bot_token = ''
+telegram_chat_id = ''
 
-# Function to fetch futures account balance
-async def get_futures_account_balance():
-    futures_balance = await binance.fetch_balance(params={'type': 'future'})
-    return futures_balance
+# Variable to store the last message sent
+last_message = {}
 
-# Main function (now defined as async)
-async def main():
+# Function to create signature for request
+def generate_signature(data):
+    return hmac.new(api_secret.encode('utf-8'), data.encode('utf-8'), hashlib.sha256).hexdigest()
+
+# Function to get future account balance
+def get_future_balance(api_key, api_secret):
     try:
-        futures_balance = await get_futures_account_balance()
-        print("Futures Account Balance:")
-        print(futures_balance)
-
+        # Construct request URL
+        base_url = 'https://fapi.binance.com'
+        endpoint = '/fapi/v2/account'
+        url = base_url + endpoint
+        
+        # Add API key, timestamp, and signature to request headers
+        timestamp = int(time.time() * 1000)
+        recv_window = 10000  # Adjust the value as needed, in milliseconds
+        query_string = urllib.parse.urlencode({'timestamp': timestamp})
+        signature = generate_signature(query_string)
+        headers = {
+            'X-MBX-APIKEY': api_key,
+            'recvWindow': str(recv_window)  # Convert recvWindow to string
+        }
+        
+        # Send request
+        response = requests.get(url, headers=headers, params={'timestamp': timestamp, 'signature': signature})
+        data = response.json()
+        
+        # Parse response
+        if 'assets' in data:
+            assets = data['assets']
+            for asset in assets:
+                asset_name = asset['asset']
+                balance = float(asset['walletBalance'])
+                yield asset_name, balance
+        else:
+            print("Failed to fetch future account balances:", data)
     except Exception as e:
-        print(f"Error fetching futures account balance: {e}")
+        print("An error occurred:", e)
 
-# Run the main function
+# Function to send message to Telegram
+def send_telegram_message(message):
+    url = f"https://api.telegram.org/bot{telegram_bot_token}/sendMessage"
+    data = {
+        "chat_id": telegram_chat_id,
+        "text": message
+    }
+    response = requests.post(url, data=data)
+    return response.json()
+
+# Function to monitor balance increase
+def monitor_balance_increase(api_key, api_secret):
+    prev_fixed_balance = 100.0  # Fixed initial balance
+    global last_message
+    while True:
+        for asset, balance in get_future_balance(api_key, api_secret):
+            percentage_increase = ((balance - prev_fixed_balance) / prev_fixed_balance) * 100
+            if percentage_increase >= 5:  # Increased by more than 5% compared to fixed balance
+                message = f"{asset}: increased by {percentage_increase:.2f}% "
+                
+                if last_message.get(asset) != message:
+                    print(message)
+                    send_telegram_message(message)
+                    last_message[asset] = message
+                
+        time.sleep(300)  # Wait for 5 seconds before checking again
+
+# Main function to run the bot
+def main():
+    print("Monitoring Future Balances for increase compared to $100 USDT:")
+    monitor_balance_increase(api_key, api_secret)
+
 if __name__ == "__main__":
-    asyncio.run(main())
-
+    main()
