@@ -1,0 +1,89 @@
+import requests
+import json
+import time
+import hashlib
+import hmac
+import urllib.parse
+
+# Binance API keys
+api_key = ''
+api_secret = ''
+
+# Telegram bot token and chat ID
+telegram_bot_token = ''
+telegram_chat_id = ''
+
+# Variable to store the last message sent
+last_message = {}
+
+# Function to create signature for request
+def generate_signature(data):
+    return hmac.new(api_secret.encode('utf-8'), data.encode('utf-8'), hashlib.sha256).hexdigest()
+
+# Function to get future positions
+def get_future_positions(api_key, api_secret):
+    try:
+        # Construct request URL
+        base_url = 'https://fapi.binance.com'
+        endpoint = '/fapi/v2/positionRisk'
+        url = base_url + endpoint
+        
+        # Add API key, timestamp, and signature to request headers
+        timestamp = int(time.time() * 1000)
+        recv_window = 10000  # Adjust the value as needed, in milliseconds
+        query_string = urllib.parse.urlencode({'timestamp': timestamp})
+        signature = generate_signature(query_string)
+        headers = {
+            'X-MBX-APIKEY': api_key,
+            'recvWindow': str(recv_window)  # Convert recvWindow to string
+        }
+        
+        # Send request
+        response = requests.get(url, headers=headers, params={'timestamp': timestamp, 'signature': signature})
+        data = response.json()
+        
+        # Parse response
+        if isinstance(data, list):
+            for position in data:
+                if float(position['positionAmt']) != 0:
+                    symbol = position['symbol']
+                    pnl = float(position['unRealizedProfit'])
+                    yield symbol, pnl
+        else:
+            print("Failed to fetch future positions:", data)
+    except Exception as e:
+        print("An error occurred:", e)
+
+# Function to send message to Telegram
+def send_telegram_message(message):
+    url = f"https://api.telegram.org/bot{telegram_bot_token}/sendMessage"
+    data = {
+        "chat_id": telegram_chat_id,
+        "text": message
+    }
+    response = requests.post(url, data=data)
+    return response.json()
+
+# Function to monitor PnL changes
+def monitor_pnl(api_key, api_secret):
+    prev_pnl = {}  # Dictionary to store previous PnL
+    global last_message
+    while True:
+        total_pnl_usd = 0.0
+        for symbol, pnl in get_future_positions(api_key, api_secret):
+            total_pnl_usd += pnl
+            prev_pnl[symbol] = pnl
+        
+        message = f"Total PnL: ${total_pnl_usd:.2f} USD"
+        print(message)
+        send_telegram_message(message)
+        
+        time.sleep(300)  # Wait for 5 seconds before checking again
+
+# Main function to run the bot
+def main():
+    print("Monitoring Future Total PnL in USD:")
+    monitor_pnl(api_key, api_secret)
+
+if __name__ == "__main__":
+    main()
