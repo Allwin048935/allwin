@@ -104,7 +104,7 @@ def ema_strategy():
                 if (
     (
         historical_data['short_ema'].iloc[-2] >= historical_data['short_ema'].iloc[-3] and
-								historical_data['short_ema'].iloc[-2] <= historical_data['short_ema'].iloc[-3] and        last_order_types[symbol] != 'BUY'
+        last_order_types[symbol] != 'BUY'
     )
 ):
                     print(f'{symbol} Buy Signal (Crossover)')
@@ -115,7 +115,7 @@ def ema_strategy():
 
                 elif (
     (
-        historical_data['short_ema'].iloc[-1] <= historical_data['short_ema'].iloc[-2] and
+        historical_data['short_ema'].iloc[-2] <= historical_data['short_ema'].iloc[-3] and
         last_order_types[symbol] != 'SELL'
     )
 ):
