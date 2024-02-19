@@ -79,7 +79,7 @@ def ema_strategy():
                     continue
 
                 # Fetch the latest candlestick for each symbol
-                latest_candle = exchange.fetch_ohlcv(symbol, '30m', limit=5)
+                latest_candle = exchange.fetch_ohlcv(symbol, '30m', limit=1)
                 latest_open = latest_candle[0][1]  # Open price of the latest candle
 
                 # Calculate the quantity based on the fixed USDT value
