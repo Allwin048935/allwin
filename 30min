@@ -78,12 +78,13 @@ def ema_strategy():
                     print(f"Not enough data for {symbol}. Waiting for more data...")
                     continue
 
-                # Fetch the latest candlestick for each symbol
-                latest_candle = exchange.fetch_ohlcv(symbol, '30m', limit=1)
-                latest_open = latest_candle[0][1]  # Open price of the latest candle
+                # Fetch the latest candlestick for each symbol with a 30-minute interval
+                latest_candles = exchange.fetch_ohlcv(symbol, '30m', limit=2)  # Fetching 2 candles
+                previous_candle_open = latest_candles[1][1]  # Open price of the previous candle
+                current_candle_open = latest_candles[0][1]   # Open price of the current candle
 
                 # Calculate the quantity based on the fixed USDT value
-                quantity = fixed_quantity_usdt / float(latest_open)
+                quantity = fixed_quantity_usdt / float(current_candle_open)
 
                 # print(f"Symbol: {symbol}, Latest Open: {latest_open}, Quantity: {quantity}")
 
@@ -92,8 +93,8 @@ def ema_strategy():
 
                 # Make trading decisions for each symbol
                 if (
-                    short_ema_15min.iloc[-2] >= latest_open[2] and
-                    short_ema_15min.iloc[-3] <= latest_open[2] and
+                    short_ema_15min.iloc[-2] >= previous_candle_open and
+                    short_ema_15min.iloc[-3] <= previous_candle_open and
                     last_order_types[symbol] != 'BUY'
                 ):
                     print(f'{symbol} Buy Signal (Short EMA cross over Open)')
@@ -103,8 +104,8 @@ def ema_strategy():
                     last_order_types[symbol] = 'BUY'
 
                 elif (
-                    short_ema_15min.iloc[-2] <= latest_open[2] and
-                    short_ema_15min.iloc[-3] >= latest_open[2] and
+                    short_ema_15min.iloc[-2] <= previous_candle_open and
+                    short_ema_15min.iloc[-3] >= previous_candle_open and
                     last_order_types[symbol] != 'SELL'
                 ):
                     print(f'{symbol} Sell Signal (Short EMA cross under Open)')
