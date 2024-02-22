@@ -129,21 +129,21 @@ def ema_strategy():
                     if (latest_close - entry_prices[symbol]) / entry_prices[symbol] >= take_profit_percent:
                         print(f'{symbol} Long Position Take Profit')
                         place_market_sell_order(symbol, quantity)
-                        last_order_types[symbol] = None
+                        last_order_types[symbol] = 'lotp'
                     elif (latest_close - entry_prices[symbol]) / entry_prices[symbol] <= -stop_loss_percent:
                         print(f'{symbol} Long Position Stop Loss')
                         place_market_sell_order(symbol, quantity)
-                        last_order_types[symbol] = None
+                        last_order_types[symbol] = 'losl'
 
                 elif last_order_types[symbol] == 'SHORT':
                     if (entry_prices[symbol] - latest_close) / entry_prices[symbol] >= take_profit_percent:
                         print(f'{symbol} Short Position Take Profit')
                         place_market_buy_order(symbol, quantity)
-                        last_order_types[symbol] = None
+                        last_order_types[symbol] = 'shtp'
                     elif (entry_prices[symbol] - latest_close) / entry_prices[symbol] <= -stop_loss_percent:
                         print(f'{symbol} Short Position Stop Loss')
                         place_market_buy_order(symbol, quantity)
-                        last_order_types[symbol] = None
+                        last_order_types[symbol] = 'shsl'
 
             # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(60)
