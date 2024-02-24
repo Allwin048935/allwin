@@ -140,9 +140,9 @@ def ema_strategy():
                 # Calculate the quantity based on the fixed USDT value
                 quantity = fixed_quantity_usdt / float(latest_close)
 
-                # Print StochRSI and StochRSI moving average values
-                print(f"{symbol} StochRSI2: {historical_data['stochrsi'].iloc[-2]}, StochRSI MA2: {historical_data['stochrsi_ma'].iloc[-2]}")
-                print(f"{symbol} StochRSI3: {historical_data['stochrsi'].iloc[-3]}, StochRSI MA3: {historical_data['stochrsi_ma'].iloc[-3]}")
+                # Print StochRSI %K and %D values
+                print(f"{symbol} StochRSI %K: {historical_data['stochrsi_k'].iloc[-1]}, StochRSI %D: {historical_data['stochrsi_d'].iloc[-1]}")
+
 
                 # Make trading decisions for each symbol
                 if (
