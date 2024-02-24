@@ -93,7 +93,6 @@ def close_long_position(symbol, quantity):
             amount=quantity
         )
         print(f"Closed Long Position for {symbol}: {order}")
-        open_positions[symbol] = None
         return order
     except Exception as e:
         print(f"Error closing Long Position for {symbol}: {e}")
@@ -106,7 +105,6 @@ def close_short_position(symbol, quantity):
             amount=quantity
         )
         print(f"Closed Short Position for {symbol}: {order}")
-        open_positions[symbol] = None
         return order
     except Exception as e:
         print(f"Error closing Short Position for {symbol}: {e}")
@@ -144,9 +142,10 @@ def ema_strategy():
                 # Make trading decisions for each symbol
                 if (
                     last_order_types[symbol] != 'LONG' and
-                    (historical_data['short_ema'].iloc[-2] > historical_data['long_ema'].iloc[-2] and
-                    historical_data['short_ema'].iloc[-3] <= historical_data['long_ema'].iloc[-3]) and
-                    historical_data['stochrsi'].iloc[-1] > historical_data['stochrsi_ma'].iloc[-1]  # StochRSI above its moving average
+                    historical_data['stochrsi'].iloc[-2] > historical_data['stochrsi_ma'].iloc[-2] and
+                    historical_data['stochrsi'].iloc[-3] <= historical_data['stochrsi_ma'].iloc[-3] and
+                    historical_data['short_ema'].iloc[-2] > historical_data['short_ema'].iloc[-3] and 
+                    historical_data['stochrsi'].iloc[-2] >= 70
                 ):
                     print(f'{symbol} Long Entry Signal')
                     # Close existing short position if any
@@ -159,20 +158,20 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] == 'LONG' and
-                    (historical_data['short_ema'].iloc[-3] >= (historical_data['long_ema'].iloc[-3]*1.01) and
-                    historical_data['short_ema'].iloc[-2] < (historical_data['long_ema'].iloc[-2]*1.01))
+                    (historical_data['stochrsi'].iloc[-3] >= historical_data['stochrsi_ma'].iloc[-3] and
+                    historical_data['stochrsi'].iloc[-2] < historical_data['stochrsi_ma'].iloc[-2])
                 ):
                     print(f'{symbol} Long Exit Signal')
                     # Close existing long position if short EMA crosses below long EMA
                     close_long_position(symbol, quantity)
                     open_positions[symbol] = None
-                    last_order_types[symbol] = None
 
                 elif (
                     last_order_types[symbol] != 'SHORT' and
-                    (historical_data['long_ema'].iloc[-2] > historical_data['short_ema'].iloc[-2] and
-                    historical_data['long_ema'].iloc[-3] <= historical_data['short_ema'].iloc[-3]) and
-                    historical_data['stochrsi'].iloc[-1] < historical_data['stochrsi_ma'].iloc[-1]  # StochRSI below its moving average
+                    historical_data['stochrsi'].iloc[-2] < historical_data['stochrsi_ma'].iloc[-2] and
+                    historical_data['stochrsi'].iloc[-3] >= historical_data['stochrsi_ma'].iloc[-3] and
+                    historical_data['short_ema'].iloc[-2] < historical_data['short_ema'].iloc[-3] and 
+                    historical_data['stochrsi'].iloc[-2] <= 30
                 ):
                     print(f'{symbol} Short Entry Signal')
                     # Close existing long position if any
@@ -185,14 +184,13 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] == 'SHORT' and
-                    (historical_data['short_ema'].iloc[-3] <= (historical_data['long_ema'].iloc[-3]*0.99) and
-                    historical_data['short_ema'].iloc[-2] > (historical_data['long_ema'].iloc[-2]*0.99))
+                    (historical_data['stochrsi'].iloc[-3] <= historical_data['stochrsi_ma'].iloc[-3] and
+                    historical_data['stochrsi'].iloc[-2] > historical_data['stochrsi_ma'].iloc[-2])
                 ):
                     print(f'{symbol} Short Exit Signal')
                     # Close existing short position if short EMA crosses above long EMA
                     close_short_position(symbol, quantity)
                     open_positions[symbol] = None
-                    last_order_types[symbol] = None
 
             # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(60)
