@@ -54,12 +54,20 @@ def calculate_ema(df, period, column='close'):
 # Function to calculate StochRSI
 def calculate_stochrsi(df, period):
     delta = df['close'].diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
-    rs = gain / loss
+    gain = delta.where(delta > 0, 0)
+    loss = -delta.where(delta < 0, 0)
+    avg_gain = gain.rolling(window=period, min_periods=1).mean()
+    avg_loss = loss.rolling(window=period, min_periods=1).mean()
+    rs = avg_gain / avg_loss
     rsi = 100 - (100 / (1 + rs))
-    stochrsi = (rsi - rsi.rolling(window=period).min()) / (rsi.rolling(window=period).max() - rsi.rolling(window=period).min())
+    stochrsi = (rsi - rsi.rolling(window=period, min_periods=1).min()) / \
+               (rsi.rolling(window=period, min_periods=1).max() - rsi.rolling(window=period, min_periods=1).min())
     return stochrsi
+
+# Function to calculate StochRSI moving average
+def calculate_stochrsi_ma(df, period):
+    stochrsi_ma = df['stochrsi'].rolling(window=period, min_periods=1).mean()
+    return stochrsi_ma
 
 # Function to place a market buy order
 def place_market_buy_order(symbol, quantity):
