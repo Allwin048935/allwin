@@ -14,7 +14,7 @@ exchange = ccxt.binance({
 })
 
 # Define EMA strategy parameters
-short_ema_period = 9
+short_ema_period = 7
 medium_ema_period = 44  # Define the period for the medium EMA
 long_ema_period = 50
 stochrsi_period = 14
@@ -25,7 +25,7 @@ last_order_types = {symbol: None for symbol in symbols}
 open_positions = {symbol: None for symbol in symbols}
 
 # Fixed quantity in USDT worth of contracts
-fixed_quantity_usdt = 15
+fixed_quantity_usdt = 11
 
 # Function to fetch historical data for futures with EMA calculation
 def fetch_ohlcv(symbol, timeframe, limit):
@@ -115,7 +115,7 @@ def ema_strategy():
         try:
             for symbol in symbols:
                 # Fetch historical data for each symbol
-                historical_data = fetch_ohlcv(symbol, time_interval, 200)
+                historical_data = fetch_ohlcv(symbol, time_interval, 50)
 
                 # Check if there's enough data for EMA calculation
                 if len(historical_data) < long_ema_period:
@@ -142,10 +142,10 @@ def ema_strategy():
                 # Make trading decisions for each symbol
                 if (
                     last_order_types[symbol] != 'LONG' and
-                    historical_data['stochrsi'].iloc[-2] > historical_data['stochrsi_ma'].iloc[-2] and
+                    historical_data['stochrsi'].iloc[-2] >= historical_data['stochrsi_ma'].iloc[-2] and
                     historical_data['stochrsi'].iloc[-3] <= historical_data['stochrsi_ma'].iloc[-3] and
-                    historical_data['short_ema'].iloc[-2] > historical_data['short_ema'].iloc[-3] and 
-                    historical_data['stochrsi'].iloc[-2] >= 70
+                    historical_data['short_ema'].iloc[-2] >= historical_data['short_ema'].iloc[-3] and 
+                    historical_data['stochrsi'].iloc[-2] <= 30
                 ):
                     print(f'{symbol} Long Entry Signal')
                     # Close existing short position if any
@@ -159,7 +159,7 @@ def ema_strategy():
                 elif (
                     last_order_types[symbol] == 'LONG' and
                     (historical_data['stochrsi'].iloc[-3] >= historical_data['stochrsi_ma'].iloc[-3] and
-                    historical_data['stochrsi'].iloc[-2] < historical_data['stochrsi_ma'].iloc[-2])
+                    historical_data['stochrsi'].iloc[-2] <= historical_data['stochrsi_ma'].iloc[-2])
                 ):
                     print(f'{symbol} Long Exit Signal')
                     # Close existing long position if short EMA crosses below long EMA
@@ -168,10 +168,10 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] != 'SHORT' and
-                    historical_data['stochrsi'].iloc[-2] < historical_data['stochrsi_ma'].iloc[-2] and
+                    historical_data['stochrsi'].iloc[-2] <= historical_data['stochrsi_ma'].iloc[-2] and
                     historical_data['stochrsi'].iloc[-3] >= historical_data['stochrsi_ma'].iloc[-3] and
-                    historical_data['short_ema'].iloc[-2] < historical_data['short_ema'].iloc[-3] and 
-                    historical_data['stochrsi'].iloc[-2] <= 30
+                    historical_data['short_ema'].iloc[-2] <= historical_data['short_ema'].iloc[-3] and 
+                    historical_data['stochrsi'].iloc[-2] >= 70
                 ):
                     print(f'{symbol} Short Entry Signal')
                     # Close existing long position if any
@@ -185,7 +185,7 @@ def ema_strategy():
                 elif (
                     last_order_types[symbol] == 'SHORT' and
                     (historical_data['stochrsi'].iloc[-3] <= historical_data['stochrsi_ma'].iloc[-3] and
-                    historical_data['stochrsi'].iloc[-2] > historical_data['stochrsi_ma'].iloc[-2])
+                    historical_data['stochrsi'].iloc[-2] >= historical_data['stochrsi_ma'].iloc[-2])
                 ):
                     print(f'{symbol} Short Exit Signal')
                     # Close existing short position if short EMA crosses above long EMA
