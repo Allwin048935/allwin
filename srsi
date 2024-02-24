@@ -38,10 +38,7 @@ def fetch_ohlcv(symbol, timeframe, limit):
     df['long_ema'] = calculate_ema(df, long_ema_period)
 
     # Calculate StochRSI
-    df['stochrsi'] = calculate_stochrsi(df, stochrsi_period)
-
-    # Calculate StochRSI moving average
-    df['stochrsi_ma'] = calculate_ema(df, stochrsi_ma_period, column='stochrsi')
+    df['stochrsi_k'], df['stochrsi_d'] = calculate_stochrsi(df, stochrsi_period, stochrsi_ma_period)
 
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     df.set_index('timestamp', inplace=True)
@@ -51,15 +48,19 @@ def fetch_ohlcv(symbol, timeframe, limit):
 def calculate_ema(df, period, column='close'):
     return df[column].ewm(span=period, adjust=False).mean()
 
-# Function to calculate StochRSI
-def calculate_stochrsi(df, period):
+# Function to calculate StochRSI using RSI values
+def calculate_stochrsi(df, period, stoch_period):
     delta = df['close'].diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
     loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
     rs = gain / loss
     rsi = 100 - (100 / (1 + rs))
-    stochrsi = (rsi - rsi.rolling(window=period).min()) / (rsi.rolling(window=period).max() - rsi.rolling(window=period).min())
-    return stochrsi
+    
+    # Calculate %K and %D values using Stochastic Oscillator formula
+    stochrsi_k = (rsi - rsi.rolling(window=stoch_period).min()) / (rsi.rolling(window=stoch_period).max() - rsi.rolling(window=stoch_period).min())
+    stochrsi_d = stochrsi_k.rolling(window=3).mean()  # Using a 3-period moving average for %D
+    
+    return stochrsi_k, stochrsi_d
 
 # Function to place a market buy order
 def place_market_buy_order(symbol, quantity):
@@ -197,11 +198,11 @@ def ema_strategy():
                     open_positions[symbol] = None
 
             # Sleep for some time (e.g., 5 minutes) before checking again
-            time.sleep(60)
+            time.sleep(300)
 
         except Exception as e:
             print(f'An error occurred: {e}')
-            time.sleep(60)  # Wait for a minute before trying again
+            time.sleep(300)  # Wait for a minute before trying again
 
 # Run the trading strategy
 ema_strategy()
