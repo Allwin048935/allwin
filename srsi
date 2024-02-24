@@ -51,13 +51,13 @@ def calculate_ema(df, period, column='close'):
 # Function to calculate StochRSI using RSI values
 def calculate_stochrsi(df, period, stoch_period):
     delta = df['close'].diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
+    gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
     rs = gain / loss
     rsi = 100 - (100 / (1 + rs))
     
     # Calculate %K and %D values using Stochastic Oscillator formula
-    stochrsi_k = (rsi - rsi.rolling(window=stoch_period).min()) / (rsi.rolling(window=stoch_period).max() - rsi.rolling(window=stoch_period).min())
+    stochrsi_k = (rsi - rsi.rolling(window=14).min()) / (rsi.rolling(window=14).max() - rsi.rolling(window=14).min())
     stochrsi_d = stochrsi_k.rolling(window=3).mean()  # Using a 3-period moving average for %D
     
     return stochrsi_k, stochrsi_d
