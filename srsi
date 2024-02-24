@@ -13,12 +13,9 @@ exchange = ccxt.binance({
     }
 })
 
-# Define EMA strategy parameters
-short_ema_period = 7
-medium_ema_period = 44  # Define the period for the medium EMA
-long_ema_period = 50
-stochrsi_period = 14
-stochrsi_ma_period = 3  # Period for StochRSI moving average
+# Define Stochastic Oscillator parameters
+stochastic_k_period = 14
+stochastic_d_period = 3
 
 # Track the last order type placed for each symbol
 last_order_types = {symbol: None for symbol in symbols}
@@ -27,49 +24,34 @@ open_positions = {symbol: None for symbol in symbols}
 # Fixed quantity in USDT worth of contracts
 fixed_quantity_usdt = 11
 
-# Function to calculate StochRSI
-def calculate_stochrsi(df, period):
-    rsi = df['rsi']
-    lowest_rsi = rsi.rolling(window=period).min()
-    highest_rsi = rsi.rolling(window=period).max()
-    stochrsi = (rsi - lowest_rsi) / (highest_rsi - lowest_rsi)
-    return stochrsi
+# Function to calculate Stochastic Oscillator (%K)
+def calculate_stochastic_k(df, period):
+    lowest_low = df['low'].rolling(window=period).min()
+    highest_high = df['high'].rolling(window=period).max()
+    stochastic_k = (df['close'] - lowest_low) / (highest_high - lowest_low) * 100
+    return stochastic_k
 
-# Function to calculate StochRSI moving average
-def calculate_stochrsi_ma(df, period):
-    stochrsi_ma = df['stochrsi'].rolling(window=period).mean()
-    return stochrsi_ma
+# Function to calculate Stochastic Oscillator (%D)
+def calculate_stochastic_d(df, period):
+    stochastic_d = df['stochastic_k'].rolling(window=period).mean()
+    return stochastic_d
 
-# Function to fetch historical data for futures with RSI calculation
+# Fetch historical data for futures with Stochastic Oscillator calculation
 def fetch_ohlcv(symbol, timeframe, limit):
     ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
-    # Calculate RSI
-    df['rsi'] = calculate_rsi(df)
+    # Calculate Stochastic Oscillator (%K)
+    df['stochastic_k'] = calculate_stochastic_k(df, stochastic_k_period)
 
-    # Calculate StochRSI
-    df['stochrsi'] = calculate_stochrsi(df, stochrsi_period)
-
-    # Calculate StochRSI moving average
-    df['stochrsi_ma'] = calculate_stochrsi_ma(df, stochrsi_ma_period)
+    # Calculate Stochastic Oscillator (%D)
+    df['stochastic_d'] = calculate_stochastic_d(df, stochastic_d_period)
 
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     df.set_index('timestamp', inplace=True)
     return df
 
-# Function to calculate Relative Strength Index (RSI)
-def calculate_rsi(df, period=14):
-    delta = df['close'].diff()
-    gain = delta.where(delta > 0, 0)
-    loss = -delta.where(delta < 0, 0)
-    avg_gain = gain.rolling(window=period).mean()
-    avg_loss = loss.rolling(window=period).mean()
-    rs = avg_gain / avg_loss
-    rsi = 100 - (100 / (1 + rs))
-    return rsi
-
-# Function to place a market buy order
+# Function to place a market buy order based on %K and %D
 def place_market_buy_order(symbol, quantity):
     try:
         order = exchange.create_market_buy_order(
@@ -81,7 +63,7 @@ def place_market_buy_order(symbol, quantity):
     except Exception as e:
         print(f"Error placing Market Buy Order for {symbol}: {e}")
 
-# Function to place a market sell order
+# Function to place a market sell order based on %K and %D
 def place_market_sell_order(symbol, quantity):
     try:
         order = exchange.create_market_sell_order(
@@ -93,7 +75,7 @@ def place_market_sell_order(symbol, quantity):
     except Exception as e:
         print(f"Error placing Market Sell Order for {symbol}: {e}")
 
-# Function to close long position
+# Function to close long position based on %K and %D
 def close_long_position(symbol, quantity):
     try:
         order = exchange.create_market_sell_order(
@@ -105,7 +87,7 @@ def close_long_position(symbol, quantity):
     except Exception as e:
         print(f"Error closing Long Position for {symbol}: {e}")
 
-# Function to close short position
+# Function to close short position based on %K and %D
 def close_short_position(symbol, quantity):
     try:
         order = exchange.create_market_buy_order(
@@ -125,8 +107,8 @@ def ema_strategy():
                 # Fetch historical data for each symbol
                 historical_data = fetch_ohlcv(symbol, time_interval, 200)
 
-                # Check if there's enough data for EMA calculation
-                if len(historical_data) < long_ema_period:
+                # Check if there's enough data for calculation
+                if len(historical_data) < stochastic_d_period:
                     print(f"Not enough data for {symbol}. Waiting for more data...")
                     continue
 
@@ -147,10 +129,9 @@ def ema_strategy():
                 # Calculate the quantity based on the fixed USDT value
                 quantity = fixed_quantity_usdt / float(latest_close)
 
-                # Print StochRSI and StochRSI moving average values
-                print(f"{symbol} StochRSI2: {historical_data['stochrsi'].iloc[-2]}, StochRSI MA2: {historical_data['stochrsi_ma'].iloc[-2]}")
-                print(f"{symbol} StochRSI3: {historical_data['stochrsi'].iloc[-3]}, StochRSI MA3: {historical_data['stochrsi_ma'].iloc[-3]}")
-
+                # Print %K and %D values
+                print(f"{symbol} %K: {historical_data['stochastic_k'].iloc[-1]}, %D: {historical_data['stochastic_d'].iloc[-1]}")
+       
                 # Make trading decisions for each symbol
                 if (
                     last_order_types[symbol] != 'LONG' and
