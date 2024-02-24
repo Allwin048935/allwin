@@ -130,7 +130,7 @@ def ema_strategy():
                 quantity = fixed_quantity_usdt / float(latest_close)
 
                 # Print %K and %D values
-                print(f"{symbol} %K: {historical_data['stochastic_k'].iloc[-1]}, %D: {historical_data['stochastic_d'].iloc[-1]}")
+                print(f"{symbol} %K: {historical_data['stochastic_k'].iloc[-2]}, %D: {historical_data['stochastic_d'].iloc[-2]}")
        
                 # Make trading decisions for each symbol
                 if (
