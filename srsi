@@ -51,8 +51,8 @@ def calculate_ema(df, period, column='close'):
 # Function to calculate StochRSI using RSI values
 def calculate_stochrsi(df, period, stoch_period):
     delta = df['close'].diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+    gain = (delta.where(delta > 0, 0)).rolling(window=50).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=50).mean()
     rs = gain / loss
     rsi = 100 - (100 / (1 + rs))
     
@@ -147,8 +147,8 @@ def ema_strategy():
                 # Make trading decisions for each symbol
                 if (
                     last_order_types[symbol] != 'LONG' and
-                    (historical_data['stochrsi'].iloc[-2] >= historical_data['stochrsi_ma'].iloc[-2] and
-                    historical_data['stochrsi'].iloc[-3] <= historical_data['stochrsi_ma'].iloc[-3]) and
+                    (historical_data['stochrsi_k'].iloc[-2] >= historical_data['stochrsi_d'].iloc[-2] and
+                    historical_data['stochrsi_k'].iloc[-3] <= historical_data['stochrsi_d'].iloc[-3]) and
                     (historical_data['short_ema'].iloc[-2] >= historical_data['short_ema'].iloc[-3]) and 
                     historical_data['stochrsi'].iloc[-2] <= 0.30
                 ):
@@ -163,8 +163,8 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] == 'LONG' and
-                    (historical_data['stochrsi'].iloc[-3] >= historical_data['stochrsi_ma'].iloc[-3] and
-                    historical_data['stochrsi'].iloc[-2] <= historical_data['stochrsi_ma'].iloc[-2])
+                    (historical_data['stochrsi_k'].iloc[-3] >= historical_data['stochrsi_d'].iloc[-3] and
+                    historical_data['stochrsi_k'].iloc[-2] <= historical_data['stochrsi_d'].iloc[-2])
                 ):
                     print(f'{symbol} Long Exit Signal')
                     # Close existing long position if short EMA crosses below long EMA
@@ -173,8 +173,8 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] != 'SHORT' and
-                    historical_data['stochrsi'].iloc[-2] <= historical_data['stochrsi_ma'].iloc[-2] and
-                    historical_data['stochrsi'].iloc[-3] >= historical_data['stochrsi_ma'].iloc[-3] and
+                    historical_data['stochrsi_k'].iloc[-2] <= historical_data['stochrsi_d'].iloc[-2] and
+                    historical_data['stochrsi_k'].iloc[-3] >= historical_data['stochrsi_d'].iloc[-3] and
                     historical_data['short_ema'].iloc[-2] <= historical_data['short_ema'].iloc[-3] and 
                     historical_data['stochrsi'].iloc[-2] >= 0.70
                 ):
@@ -189,8 +189,8 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] == 'SHORT' and
-                    (historical_data['stochrsi'].iloc[-3] <= historical_data['stochrsi_ma'].iloc[-3] and
-                    historical_data['stochrsi'].iloc[-2] >= historical_data['stochrsi_ma'].iloc[-2])
+                    (historical_data['stochrsi_k'].iloc[-3] <= historical_data['stochrsi_d'].iloc[-3] and
+                    historical_data['stochrsi_k'].iloc[-2] >= historical_data['stochrsi_d'].iloc[-2])
                 ):
                     print(f'{symbol} Short Exit Signal')
                     # Close existing short position if short EMA crosses above long EMA
