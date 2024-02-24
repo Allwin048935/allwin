@@ -27,58 +27,65 @@ open_positions = {symbol: None for symbol in symbols}
 # Fixed quantity in USDT worth of contracts
 fixed_quantity_usdt = 11
 
+# Function to calculate Relative Strength Index (RSI)
+def calculate_rsi(df, period=14):
+    delta = df['close'].diff()
+    gain = delta.where(delta > 0, 0)
+    loss = -delta.where(delta < 0, 0)
+    avg_gain = gain.rolling(window=period, min_periods=1).mean()
+    avg_loss = loss.rolling(window=period, min_periods=1).mean()
+    rs = avg_gain / avg_loss
+    rsi = 100 - (100 / (1 + rs))
+    return rsi
+
+# Function to calculate StochRSI
+def calculate_stochrsi(df, period):
+    rsi_values = df['rsi']
+    stochrsi_values = []
+    for i in range(len(rsi_values)):
+        if i < period:
+            stochrsi_values.append(0)  # Not enough data
+        else:
+            rsi_slice = rsi_values[i - period + 1: i + 1]
+            rsi_min = min(rsi_slice)
+            rsi_max = max(rsi_slice)
+            if rsi_max == rsi_min:
+                stochrsi_values.append(0.5)
+            else:
+                current_rsi = rsi_values[i]
+                stochrsi = (current_rsi - rsi_min) / (rsi_max - rsi_min)
+                stochrsi_values.append(stochrsi)
+    return stochrsi_values
+
+# Function to calculate StochRSI moving average
+def calculate_stochrsi_ma(df, period):
+    stochrsi_values = df['stochrsi']
+    stochrsi_ma_values = []
+    for i in range(len(stochrsi_values)):
+        if i < period:
+            stochrsi_ma_values.append(0)  # Not enough data
+        else:
+            stochrsi_ma = sum(stochrsi_values[i - period + 1: i + 1]) / period
+            stochrsi_ma_values.append(stochrsi_ma)
+    return stochrsi_ma_values
+
 # Function to fetch historical data for futures with EMA calculation
 def fetch_ohlcv(symbol, timeframe, limit):
     ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
-    # Calculate short, medium, and long EMAs
-    df['short_ema'] = calculate_ema(df, short_ema_period)
-    df['medium_ema'] = calculate_ema(df, medium_ema_period)  # Calculate medium EMA
-    df['long_ema'] = calculate_ema(df, long_ema_period)
+    # Calculate RSI
+    df['rsi'] = calculate_rsi(df)
 
     # Calculate StochRSI
     df['stochrsi'] = calculate_stochrsi(df, stochrsi_period)
 
     # Calculate StochRSI moving average
-    df['stochrsi_ma'] = calculate_ema(df, stochrsi_ma_period, column='stochrsi')
+    df['stochrsi_ma'] = calculate_stochrsi_ma(df, stochrsi_ma_period)
 
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     df.set_index('timestamp', inplace=True)
     return df
-
-# Function to calculate EMA
-def calculate_ema(df, period, column='close'):
-    return df[column].ewm(span=period, adjust=False).mean()
-
-# Function to calculate StochRSI
-def calculate_stochrsi(df, period):
-    rsi = df['rsi']
-    stochrsi = []
-    for i in range(len(rsi)):
-        if i < period:
-            stochrsi.append(0)  # Not enough data to calculate StochRSI
-        else:
-            rsi_slice = rsi[i - period + 1: i + 1]
-            rsi_min = min(rsi_slice)
-            rsi_max = max(rsi_slice)
-            if rsi_max == rsi_min:
-                stochrsi.append(0.5)
-            else:
-                stochrsi.append((rsi[-1] - rsi_min) / (rsi_max - rsi_min))
-    return stochrsi
-
-# Function to calculate StochRSI moving average
-def calculate_stochrsi_ma(df, period):
-    stochrsi = df['stochrsi']
-    stochrsi_ma = []
-    for i in range(len(stochrsi)):
-        if i < period:
-            stochrsi_ma.append(0)  # Not enough data to calculate moving average
-        else:
-            stochrsi_ma.append(sum(stochrsi[i - period + 1: i + 1]) / period)
-    return stochrsi_ma
-
 
 # Function to place a market buy order
 def place_market_buy_order(symbol, quantity):
@@ -223,4 +230,4 @@ def ema_strategy():
             time.sleep(60)  # Wait for a minute before trying again
 
 # Run the trading strategy
-ema_strategy() 
+ema_strategy()
