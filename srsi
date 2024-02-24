@@ -54,14 +54,29 @@ def calculate_ema(df, period, column='close'):
 # Function to calculate StochRSI
 def calculate_stochrsi(df, period):
     rsi = df['rsi']
-    lowest_rsi = rsi.rolling(window=period).min()
-    highest_rsi = rsi.rolling(window=period).max()
-    stochrsi = (rsi - lowest_rsi) / (highest_rsi - lowest_rsi)
+    stochrsi = []
+    for i in range(len(rsi)):
+        if i < period:
+            stochrsi.append(0)  # Not enough data to calculate StochRSI
+        else:
+            rsi_slice = rsi[i - period + 1: i + 1]
+            rsi_min = min(rsi_slice)
+            rsi_max = max(rsi_slice)
+            if rsi_max == rsi_min:
+                stochrsi.append(0.5)
+            else:
+                stochrsi.append((rsi[-1] - rsi_min) / (rsi_max - rsi_min))
     return stochrsi
 
 # Function to calculate StochRSI moving average
 def calculate_stochrsi_ma(df, period):
-    stochrsi_ma = df['stochrsi'].rolling(window=period).mean()
+    stochrsi = df['stochrsi']
+    stochrsi_ma = []
+    for i in range(len(stochrsi)):
+        if i < period:
+            stochrsi_ma.append(0)  # Not enough data to calculate moving average
+        else:
+            stochrsi_ma.append(sum(stochrsi[i - period + 1: i + 1]) / period)
     return stochrsi_ma
 
 
