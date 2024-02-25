@@ -1,7 +1,6 @@
 import pandas as pd
-import numpy as np
-import talib
 from binance.client import Client
+from ta.momentum import StochRSIIndicator
 from datetime import datetime
 
 # Binance API credentials
@@ -21,18 +20,21 @@ limit = 100
 # Fetch historical data
 klines = client.get_klines(symbol=symbol, interval=interval, limit=limit)
 
-# Extracting closing prices
+# Extracting closing prices and timestamps
 closing_prices = [float(kline[4]) for kline in klines]
-
-# Converting timestamps to datetime objects
 timestamps = [datetime.utcfromtimestamp(kline[0] / 1000) for kline in klines]
 
 # Create a DataFrame
 data = pd.DataFrame({'timestamp': timestamps, 'close': closing_prices})
 
 # Calculate StochRSI
-stochrsi = talib.STOCHRSI(data['close'], timeperiod=14, fastk_period=3, fastd_period=3, fastd_matype=0)
+indicator = StochRSIIndicator(close=data['close'], window=14, smooth1=3, smooth2=3)
+data['stochrsi'] = indicator.stochrsi()
+data['stochrsi_k'] = indicator.stochrsi_k()
+data['stochrsi_d'] = indicator.stochrsi_d()
 
 # Print StochRSI, K, and D values
-print("StochRSI:", stochrsi)
+print("StochRSI:", data['stochrsi'].iloc[-1])
+print("StochRSI K:", data['stochrsi_k'].iloc[-1])
+print("StochRSI D:", data['stochrsi_d'].iloc[-1])
 
