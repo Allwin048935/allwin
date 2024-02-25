@@ -11,7 +11,7 @@ api_secret = 'N4myBDNkkD203gxxpo8NLQgdZxdvzm7N7PpBjBU0DiTtctTLaFQEVev51N4P5R5g'
 client = Client(api_key, api_secret)
 
 # Symbol and time interval
-symbol = 'BTCUSDT'
+symbol = 'COTIUSDT'
 interval = Client.KLINE_INTERVAL_1HOUR
 
 # Number of candles to retrieve
@@ -37,4 +37,10 @@ data['stochrsi_d'] = indicator.stochrsi_d()
 print("StochRSI:", data['stochrsi'].iloc[-1])
 print("StochRSI K:", data['stochrsi_k'].iloc[-1])
 print("StochRSI D:", data['stochrsi_d'].iloc[-1])
+print("StochRSI:", data['stochrsi'].iloc[-2])
+print("StochRSI K:", data['stochrsi_k'].iloc[-2])
+print("StochRSI D:", data['stochrsi_d'].iloc[-2])
+print("StochRSI:", data['stochrsi'].iloc[-3])
+print("StochRSI K:", data['stochrsi_k'].iloc[-3])
+print("StochRSI D:", data['stochrsi_d'].iloc[-3])
 
