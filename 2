@@ -2,6 +2,9 @@ import ccxt
 import pandas as pd
 import time
 from config import BINANCE_API_KEY, BINANCE_API_SECRET, symbols, time_interval
+from binance.client import Client
+from ta.momentum import StochRSIIndicator
+from datetime import datetime
 
 # Create a Binance Futures client
 exchange = ccxt.binance({
