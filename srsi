@@ -53,6 +53,7 @@ def ema_strategy():
             for symbol in symbols:
                 # Fetch historical Kline data for each symbol
                 historical_data = fetch_kline(symbol, time_interval, 200)
+                print(historical_data)  # Print fetched data for debugging
 
                 # Check if there's enough data for calculation
                 if len(historical_data) < stochrsi_period:
