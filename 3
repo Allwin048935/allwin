@@ -174,7 +174,6 @@ def ema_strategy(interval):
                     # Close existing long position if short EMA crosses below long EMA
                     close_long_position(symbol, quantity)
                     open_positions[symbol] = None
-                    last_order_types[symbol] = None
 
                 elif (
                     last_order_types[symbol] != 'SHORT' and
@@ -199,7 +198,6 @@ def ema_strategy(interval):
                     # Close existing short position if short EMA crosses above long EMA
                     close_short_position(symbol, quantity)
                     open_positions[symbol] = None
-                    last_order_types[symbol] = None
 
             # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(60)
