@@ -60,9 +60,9 @@ def calculate_stochrsi(symbol, interval, limit):
 
     # Print StochRSI, K, and D values for the last time period
     print(f"Symbol: {symbol}")
-    print("StochRSI:", data['stochrsi'].iloc[-1])
-    print("StochRSI K:", data['stochrsi_k'].iloc[-1])
-    print("StochRSI D:", data['stochrsi_d'].iloc[-1])
+    print("StochRSI:", data['stochrsi'].iloc[-2]*100)
+    print("StochRSI K:", data['stochrsi_k'].iloc[-2]*100)
+    print("StochRSI D:", data['stochrsi_d'].iloc[-2]*100)
     print()
 
 # Symbols and time intervals
