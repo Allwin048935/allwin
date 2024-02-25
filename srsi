@@ -215,4 +215,4 @@ def ema_strategy(interval):
             time.sleep(60)  # Wait for a minute before trying again
 
 # Run the trading strategy
-ema_strategy(ccxt.Exchange.KLINE_INTERVAL_15MIN)
+ema_strategy(ccxt.Exchange.KLINE_INTERVAL_15M)
