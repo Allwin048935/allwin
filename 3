@@ -4,7 +4,7 @@ import time
 from binance.client import Client
 from ta.momentum import StochRSIIndicator
 from datetime import datetime
-from config import BINANCE_API_KEY, BINANCE_API_SECRET, symbols, time_interval
+from config import BINANCE_API_KEY, BINANCE_API_SECRET, symbols
 
 # Create a Binance Futures client
 exchange = ccxt.binance({
@@ -66,13 +66,67 @@ def calculate_stochrsi(symbol, interval, limit):
     # Return the DataFrame
     return data
 
+# Function to calculate EMA
+def calculate_ema(df, period, column='close'):
+    return df[column].ewm(span=period, adjust=False).mean()
+
+# Function to place a market buy order
+def place_market_buy_order(symbol, quantity):
+    try:
+        order = exchange.create_market_buy_order(
+            symbol=symbol,
+            amount=quantity
+        )
+        print(f"Market Buy Order placed for {symbol}: {order}")
+        return order
+    except Exception as e:
+        print(f"Error placing Market Buy Order for {symbol}: {e}")
+
+# Function to place a market sell order
+def place_market_sell_order(symbol, quantity):
+    try:
+        order = exchange.create_market_sell_order(
+            symbol=symbol,
+            amount=quantity
+        )
+        print(f"Market Sell Order placed for {symbol}: {order}")
+        return order
+    except Exception as e:
+        print(f"Error placing Market Sell Order for {symbol}: {e}")
+
+# Function to close long position
+def close_long_position(symbol, quantity):
+    try:
+        order = exchange.create_market_sell_order(
+            symbol=symbol,
+            amount=quantity
+        )
+        print(f"Closed Long Position for {symbol}: {order}")
+        open_positions[symbol] = None
+        return order
+    except Exception as e:
+        print(f"Error closing Long Position for {symbol}: {e}")
+
+# Function to close short position
+def close_short_position(symbol, quantity):
+    try:
+        order = exchange.create_market_buy_order(
+            symbol=symbol,
+            amount=quantity
+        )
+        print(f"Closed Short Position for {symbol}: {order}")
+        open_positions[symbol] = None
+        return order
+    except Exception as e:
+        print(f"Error closing Short Position for {symbol}: {e}")
+
 # Main trading function for futures
-def ema_strategy():
+def ema_strategy(interval):
     while True:
         try:
             for symbol in symbols:
                 # Fetch historical data for each symbol
-                data = calculate_stochrsi(symbol, interval, limit1)  # Call calculate_stochrsi function
+                data = calculate_stochrsi(symbol, interval, 100)  # Call calculate_stochrsi function
 
                 # Check if there's enough data for EMA calculation
                 if len(data) < long_ema_period:
@@ -81,7 +135,7 @@ def ema_strategy():
 
                 # Fetch the latest candlestick for each symbol
                 latest_candle = exchange.fetch_ticker(symbol)
-                
+
                 if 'close' not in latest_candle:
                     print(f"Error: 'close' not found in the latest_candle for {symbol}")
                     continue
@@ -155,4 +209,4 @@ def ema_strategy():
             time.sleep(60)  # Wait for a minute before trying again
 
 # Run the trading strategy
-ema_strategy()
+ema_strategy(Client.KLINE_INTERVAL_1HOUR)
