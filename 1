@@ -1,21 +1,19 @@
 import ccxt
 import numpy as np
-import talib  # <-- Correct import statement
-import config
+import talib
 
-# Create a Binance Futures client
-exchange = ccxt.binance({
-    'apiKey': BINANCE_API_KEY,
-    'secret': BINANCE_API_SECRET,
-    'enableRateLimit': True,
-    'options': {
-        'defaultType': 'future',  # Set the default type to futures
-    }
-})
+# Initialize Binance client
+def initialize_binance():
+    api_key = input("veiqd07BuRmMlxy3eeRLLKNyDnFrIphTcqgSM7XTRUCzQWTyqxK4sPtfVZioaVHi")
+    api_secret = input("N4myBDNkkD203gxxpo8NLQgdZxdvzm7N7PpBjBU0DiTtctTLaFQEVev51N4P5R5g")
+    return ccxt.binance({
+        'apiKey': api_key,
+        'secret': api_secret,
+    })
 
 # Define function to fetch historical data
-def fetch_historical_data(symbol, timeframe, limit):
-    ohlcv = binance.fetch_ohlcv(symbol, timeframe, limit=limit)
+def fetch_historical_data(symbol, timeframe, limit, exchange):
+    ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
     return np.array([ohlcv[i][4] for i in range(len(ohlcv))])
 
 # Calculate StochRSI
@@ -30,14 +28,17 @@ def calculate_ma(data, period):
 
 # Main function
 def main():
-    symbol = config.SYMBOL
+    symbol = 'BTC/USDT'
     timeframe = '1h'
     limit = 1000
     stochrsi_period = 14
     ma_period = 50
     
+    # Initialize Binance client
+    binance = initialize_binance()
+    
     # Fetch historical data
-    data = fetch_historical_data(symbol, timeframe, limit)
+    data = fetch_historical_data(symbol, timeframe, limit, binance)
     
     # Calculate indicators
     stochrsi = calculate_stochrsi(data, stochrsi_period)
@@ -50,3 +51,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
