@@ -25,9 +25,8 @@ open_positions = {symbol: None for symbol in symbols}
 # Fixed quantity in USDT worth of contracts
 fixed_quantity_usdt = 11
 
-# Fetch historical Kline data for futures
 def fetch_kline(symbol, timeframe, limit):
-    klines = client.get_klines(symbol=symbol, interval=interval, limit=100)
+    klines = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(klines, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     df.set_index('timestamp', inplace=True)
