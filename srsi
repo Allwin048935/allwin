@@ -17,7 +17,7 @@ exchange = ccxt.binance({
 })
 
 # Define EMA strategy parameters
-short_ema_period = 7
+short_ema_period = 5
 medium_ema_period = 20  # Define the period for the medium EMA
 long_ema_period = 50
 
@@ -155,7 +155,8 @@ def ema_strategy(interval):
                     last_order_types[symbol] != 'LONG' and
                     data['stochrsi_k'].iloc[-2] >= data['stochrsi_d'].iloc[-2] and
                     data['stochrsi_k'].iloc[-3] <= data['stochrsi_d'].iloc[-3] and 
-                    data['stochrsi_k'].iloc[-2] <=0.3    
+                    data['stochrsi_k'].iloc[-2] <=0.3 and 
+                    historical_data['short_ema'].iloc[-2] >= historical_data['short_ema'].iloc[-3]
                 ):
                     print(f'{symbol} Long Entry Signal')
                     # Close existing short position if any
@@ -179,7 +180,8 @@ def ema_strategy(interval):
                     last_order_types[symbol] != 'SHORT' and
                     data['stochrsi_k'].iloc[-2] <= data['stochrsi_d'].iloc[-2] and
                     data['stochrsi_k'].iloc[-3] >= data['stochrsi_d'].iloc[-3] and 
-                    data['stochrsi_k'].iloc[-2] >=0.7
+                    data['stochrsi_k'].iloc[-2] >=0.7 and 
+                    historical_data['short_ema'].iloc[-2] <= historical_data['short_ema'].iloc[-3]
                 ):
                     print(f'{symbol} Short Entry Signal')
                     # Close existing long position if any
