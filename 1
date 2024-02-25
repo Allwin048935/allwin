@@ -3,10 +3,14 @@ import numpy as np
 import talib  # <-- Correct import statement
 import config
 
-# Initialize Binance client
-binance = ccxt.binance({
-    'apiKey': config.API_KEY,
-    'secret': config.API_SECRET,
+# Create a Binance Futures client
+exchange = ccxt.binance({
+    'apiKey': BINANCE_API_KEY,
+    'secret': BINANCE_API_SECRET,
+    'enableRateLimit': True,
+    'options': {
+        'defaultType': 'future',  # Set the default type to futures
+    }
 })
 
 # Define function to fetch historical data
