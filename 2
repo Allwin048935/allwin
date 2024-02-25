@@ -5,14 +5,6 @@ from binance.client import Client
 from ta.momentum import StochRSIIndicator
 from datetime import datetime
 
-# Define your Binance API key and secret
-BINANCE_API_KEY = 'YOUR_API_KEY'
-BINANCE_API_SECRET = 'YOUR_API_SECRET'
-
-# Define your symbols and time interval
-symbols = ['BTC/USDT', 'ETH/USDT']  # Add more symbols as needed
-time_interval = '1h'
-
 # Create a Binance Futures client
 exchange = ccxt.binance({
     'apiKey': BINANCE_API_KEY,
@@ -32,7 +24,7 @@ fixed_quantity_usdt = 15
 
 # Function to fetch historical data for futures with EMA calculation
 def fetch_ohlcv(symbol, timeframe, limit):
-    ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
+    ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=100)
     df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
     # Calculate short, medium, and long EMAs
@@ -48,9 +40,9 @@ def fetch_ohlcv(symbol, timeframe, limit):
 # Initialize Binance client
 client = Client(BINANCE_API_KEY, BINANCE_API_SECRET)
 
-def calculate_stochrsi(symbol, interval, limit1):
+def calculate_stochrsi(symbol, interval, limit):
     # Fetch historical data
-    klines = client.get_klines(symbol=symbol, interval=interval, limit=limit1)
+    klines = client.get_klines(symbol=symbol, interval=interval, limit=100)
 
     # Extracting closing prices and timestamps
     closing_prices = [float(kline[4]) for kline in klines]
