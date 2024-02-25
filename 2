@@ -2,54 +2,72 @@ import pandas as pd
 from binance.client import Client
 from ta.momentum import StochRSIIndicator
 from datetime import datetime
+from config import FUTURES_SYMBOLS  # Import futures symbols from config.py
 
 # Binance API credentials
 api_key = 'veiqd07BuRmMlxy3eeRLLKNyDnFrIphTcqgSM7XTRUCzQWTyqxK4sPtfVZioaVHi'
 api_secret = 'N4myBDNkkD203gxxpo8NLQgdZxdvzm7N7PpBjBU0DiTtctTLaFQEVev51N4P5R5g'
 
-# Initialize Binance client
-client = Client(api_key, api_secret)
+# Initialize Binance client for futures
+client = Client(api_key, api_secret, tld='futures.binance.com')
 
-# Symbol and time interval
-symbol = 'COTIUSDT'
+# Symbol and time interval for futures
 interval = Client.KLINE_INTERVAL_1HOUR
 
 # Number of candles to retrieve
 limit = 100
 
-# Fetch historical data
-klines = client.get_klines(symbol=symbol, interval=interval, limit=limit)
+for symbol in FUTURES_SYMBOLS:
+    # Fetch historical data
+    klines = client.get_klines(symbol=symbol, interval=interval, limit=limit)
 
-# Extracting closing prices and timestamps
-closing_prices = [float(kline[4]) for kline in klines]
-timestamps = [datetime.utcfromtimestamp(kline[0] / 1000) for kline in klines]
+    # Extracting closing prices and timestamps
+    closing_prices = [float(kline[4]) for kline in klines]
+    timestamps = [datetime.utcfromtimestamp(kline[0] / 1000) for kline in klines]
 
-# Create a DataFrame
-data = pd.DataFrame({'timestamp': timestamps, 'close': closing_prices})
+    # Create a DataFrame
+    data = pd.DataFrame({'timestamp': timestamps, 'close': closing_prices})
 
-# Calculate StochRSI
-indicator = StochRSIIndicator(close=data['close'], window=14, smooth1=3, smooth2=3)
-data['stochrsi'] = indicator.stochrsi()
-data['stochrsi_k'] = indicator.stochrsi_k()
-data['stochrsi_d'] = indicator.stochrsi_d()
+    # Calculate StochRSI
+    indicator = StochRSIIndicator(close=data['close'], window=14, smooth1=3, smooth2=3)
+    data['stochrsi'] = indicator.stochrsi()
+    data['stochrsi_k'] = indicator.stochrsi_k()
+    data['stochrsi_d'] = indicator.stochrsi_d()
 
-# Simple trading strategy based on StochRSI
-def implement_strategy(df):
-    position = 0  # 0 for no position, 1 for long, -1 for short
-    signals = []
-    for i in range(1, len(df)):
-        if df['stochrsi'][i] > 0.8 and df['stochrsi_k'][i] > df['stochrsi_d'][i] and position != 1:
-            signals.append(1)  # Go long
-            position = 1
-        elif df['stochrsi'][i] < 0.2 and df['stochrsi_k'][i] < df['stochrsi_d'][i] and position != -1:
-            signals.append(-1)  # Go short
-            position = -1
-        else:
-            signals.append(0)  # No action
-    return signals
+    # Get the current price of the trading pair
+    ticker = client.futures_ticker(symbol=symbol)
+    current_price = float(ticker['lastPrice'])
 
-# Implement the strategy
-data['signal'] = implement_strategy(data)
+    # Calculate quantity based on the fixed amount of USDT (e.g., 100 USDT)
+    fixed_amount_usdt = 100
+    quantity = fixed_amount_usdt / current_price
 
-# Output signals
-print(data[['timestamp', 'close', 'stochrsi', 'stochrsi_k', 'stochrsi_d', 'signal']])
+    # Initialize variables for tracking positions
+    long_position = False
+    short_position = False
+
+    # Determine if to take long or short position based on StochRSI K and D
+    if data['stochrsi_k'].iloc[-2] < data['stochrsi_d'].iloc[-2]:
+        long_position = True
+    elif data['stochrsi_k'].iloc[-2] > data['stochrsi_d'].iloc[-2]:
+        short_position = True
+
+    # Place market orders for futures
+    if long_position:
+        order = client.futures_create_order(
+            symbol=symbol,
+            side=Client.SIDE_BUY,
+            type=Client.ORDER_TYPE_MARKET,
+            amount=quantity
+        )
+        print(f"Market order to buy {symbol} placed successfully.")
+    elif short_position:
+        order = client.futures_create_order(
+            symbol=symbol,
+            side=Client.SIDE_SELL,
+            type=Client.ORDER_TYPE_MARKET,
+            amount=quantity
+        )
+        print(f"Market order to sell {symbol} placed successfully.")
+    else:
+        print(f"No action for {symbol}")
