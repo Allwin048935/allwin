@@ -154,7 +154,8 @@ def ema_strategy(interval):
                 if (
                     last_order_types[symbol] != 'LONG' and
                     data['stochrsi_k'].iloc[-2] >= data['stochrsi_d'].iloc[-2] and
-                    data['stochrsi_k'].iloc[-3] <= data['stochrsi_d'].iloc[-3] 
+                    data['stochrsi_k'].iloc[-3] <= data['stochrsi_d'].iloc[-3] and 
+                    data['stochrsi_k'].iloc[-2] <=0.3    
                 ):
                     print(f'{symbol} Long Entry Signal')
                     # Close existing short position if any
@@ -177,7 +178,8 @@ def ema_strategy(interval):
                 elif (
                     last_order_types[symbol] != 'SHORT' and
                     data['stochrsi_k'].iloc[-2] <= data['stochrsi_d'].iloc[-2] and
-                    data['stochrsi_k'].iloc[-3] >= data['stochrsi_d'].iloc[-3] 
+                    data['stochrsi_k'].iloc[-3] >= data['stochrsi_d'].iloc[-3] and 
+                    data['stochrsi_k'].iloc[-2] >=0.7
                 ):
                     print(f'{symbol} Short Entry Signal')
                     # Close existing long position if any
