@@ -1,11 +1,12 @@
 import ccxt
 import numpy as np
+import talib  # <-- Correct import statement
 import config
 
 # Initialize Binance client
 binance = ccxt.binance({
-    'apiKey': BINANCE_API_KEY,
-    'secret': BINANCE_API_SECRET,
+    'apiKey': config.API_KEY,
+    'secret': config.API_SECRET,
 })
 
 # Define function to fetch historical data
@@ -13,28 +14,15 @@ def fetch_historical_data(symbol, timeframe, limit):
     ohlcv = binance.fetch_ohlcv(symbol, timeframe, limit=limit)
     return np.array([ohlcv[i][4] for i in range(len(ohlcv))])
 
-# Calculate RSI manually
-def calculate_rsi(data, period=14):
-    delta = np.diff(data)
-    gain = np.where(delta >= 0, delta, 0)
-    loss = np.where(delta < 0, -delta, 0)
+# Calculate StochRSI
+def calculate_stochrsi(data, period):
+    rsi = talib.RSI(data, timeperiod=period)
+    stochrsi = talib.STOCHRSI(rsi, rsi, rsi, fastk_period=14, fastd_period=3)
+    return stochrsi
 
-    avg_gain = np.mean(gain[:period])
-    avg_loss = np.mean(loss[:period])
-
-    rs = avg_gain / avg_loss if avg_loss != 0 else np.inf
-    rsi = 100 - (100 / (1 + rs))
-    
-    return rsi
-
-# Calculate StochRSI manually
-def calculate_stochrsi(data, period=14, smoothk=3, smoothd=3):
-    rsi = [calculate_rsi(data[i-period:i+1]) for i in range(period, len(data))]
-    rsi = np.array(rsi)
-    stochrsi_k = (rsi - np.min(rsi, axis=0)) / (np.max(rsi, axis=0) - np.min(rsi, axis=0))
-    stochrsi_d = np.convolve(stochrsi_k, np.ones(smoothd), mode='valid') / smoothd
-    
-    return stochrsi_k, stochrsi_d
+# Calculate Moving Average
+def calculate_ma(data, period):
+    return talib.SMA(data, timeperiod=period)
 
 # Main function
 def main():
@@ -42,17 +30,19 @@ def main():
     timeframe = '1h'
     limit = 1000
     stochrsi_period = 14
+    ma_period = 50
     
     # Fetch historical data
     data = fetch_historical_data(symbol, timeframe, limit)
     
     # Calculate indicators
-    stochrsi_k, stochrsi_d = calculate_stochrsi(data, stochrsi_period)
+    stochrsi = calculate_stochrsi(data, stochrsi_period)
+    ma = calculate_ma(data, ma_period)
     
     # Print RSI and StochRSI values
-    print("RSI:", calculate_rsi(data))
-    print("StochRSI K:", stochrsi_k[-1])
-    print("StochRSI D:", stochrsi_d[-1])
+    print("RSI:", talib.RSI(data, timeperiod=stochrsi_period)[-1])
+    print("StochRSI K:", stochrsi[0][-1])
+    print("StochRSI D:", stochrsi[1][-1])
 
 if __name__ == "__main__":
     main()
