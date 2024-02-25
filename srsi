@@ -27,15 +27,24 @@ fixed_quantity_usdt = 11
 
 # Fetch historical Kline data for futures
 def fetch_kline(symbol, timeframe, limit):
-    try:
-        klines = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
-        df = pd.DataFrame(klines, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-        df.set_index('timestamp', inplace=True)
-        return df
-    except Exception as e:
-        print(f"Error fetching Kline data for {symbol} with timeframe {timeframe}: {e}")
-        return None
+    klines = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
+    df = pd.DataFrame(klines, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+    df.set_index('timestamp', inplace=True)
+    return df
+
+# Calculate Stochastic RSI from OHLCV data
+def calculate_stochrsi(df):
+    # Calculate Stochastic RSI
+    df['stochrsi'] = talib.RSI(df['close'], timeperiod=stochrsi_period)
+
+    # Calculate %K line from Stochastic RSI
+    df['stochrsi_k'] = talib.EMA(df['stochrsi'], timeperiod=3)
+
+    # Calculate %D line (smoothed %K line)
+    df['stochrsi_d'] = df['stochrsi_k'].rolling(window=stochrsi_d_period).mean()
+
+    return df
 
 # Main trading function for futures
 def ema_strategy():
@@ -44,11 +53,6 @@ def ema_strategy():
             for symbol in symbols:
                 # Fetch historical Kline data for each symbol
                 historical_data = fetch_kline(symbol, time_interval, 200)
-                
-                if historical_data is None:
-                    continue
-                
-                print(historical_data)  # Print fetched data for debugging
 
                 # Check if there's enough data for calculation
                 if len(historical_data) < stochrsi_period:
