@@ -1,5 +1,6 @@
 import ccxt
 import pandas as pd
+import talib
 import time
 from config import BINANCE_API_KEY, BINANCE_API_SECRET, symbols, time_interval
 
@@ -24,80 +25,23 @@ open_positions = {symbol: None for symbol in symbols}
 # Fixed quantity in USDT worth of contracts
 fixed_quantity_usdt = 11
 
-# Function to calculate Stochastic Oscillator (%K)
-def calculate_stochastic_k(df, period):
-    lowest_low = df['low'].rolling(window=period).min()
-    highest_high = df['high'].rolling(window=period).max()
-    stochastic_k = (df['close'] - lowest_low) / (highest_high - lowest_low) * 100
-    return stochastic_k
-
-# Function to calculate Stochastic Oscillator (%D)
-def calculate_stochastic_d(df, period):
-    stochastic_d = df['stochastic_k'].rolling(window=period).mean()
-    return stochastic_d
-
 # Fetch historical data for futures with Stochastic Oscillator calculation
 def fetch_ohlcv(symbol, timeframe, limit):
     ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
-    # Calculate Stochastic Oscillator (%K)
-    df['stochastic_k'] = calculate_stochastic_k(df, stochastic_k_period)
+    # Calculate Stochastic Oscillator (%K and %D)
+    df['slowk'], df['slowd'] = talib.STOCH(df['high'], df['low'], df['close'], fastk_period=stochastic_k_period, slowk_period=3, slowk_matype=0, slowd_period=3, slowd_matype=0)
 
-    # Calculate Stochastic Oscillator (%D)
-    df['stochastic_d'] = calculate_stochastic_d(df, stochastic_d_period)
+    # Calculate Stochastic RSI (%K and %D)
+    rsi_period = 14
+    stochrsi_period = 14
+    df['rsi'] = talib.RSI(df['close'], timeperiod=rsi_period)
+    df['fastk'], df['fastd'] = talib.STOCHRSI(df['rsi'], timeperiod=stochrsi_period, fastk_period=stochastic_k_period, fastd_period=3, fastd_matype=0)
 
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     df.set_index('timestamp', inplace=True)
     return df
-
-# Function to place a market buy order based on %K and %D
-def place_market_buy_order(symbol, quantity):
-    try:
-        order = exchange.create_market_buy_order(
-            symbol=symbol,
-            amount=quantity
-        )
-        print(f"Market Buy Order placed for {symbol}: {order}")
-        return order
-    except Exception as e:
-        print(f"Error placing Market Buy Order for {symbol}: {e}")
-
-# Function to place a market sell order based on %K and %D
-def place_market_sell_order(symbol, quantity):
-    try:
-        order = exchange.create_market_sell_order(
-            symbol=symbol,
-            amount=quantity
-        )
-        print(f"Market Sell Order placed for {symbol}: {order}")
-        return order
-    except Exception as e:
-        print(f"Error placing Market Sell Order for {symbol}: {e}")
-
-# Function to close long position based on %K and %D
-def close_long_position(symbol, quantity):
-    try:
-        order = exchange.create_market_sell_order(
-            symbol=symbol,
-            amount=quantity
-        )
-        print(f"Closed Long Position for {symbol}: {order}")
-        return order
-    except Exception as e:
-        print(f"Error closing Long Position for {symbol}: {e}")
-
-# Function to close short position based on %K and %D
-def close_short_position(symbol, quantity):
-    try:
-        order = exchange.create_market_buy_order(
-            symbol=symbol,
-            amount=quantity
-        )
-        print(f"Closed Short Position for {symbol}: {order}")
-        return order
-    except Exception as e:
-        print(f"Error closing Short Position for {symbol}: {e}")
 
 # Main trading function for futures
 def ema_strategy():
@@ -129,9 +73,10 @@ def ema_strategy():
                 # Calculate the quantity based on the fixed USDT value
                 quantity = fixed_quantity_usdt / float(latest_close)
 
-                # Print %K and %D values
-                print(f"{symbol} %K: {historical_data['stochastic_k'].iloc[-2]}, %D: {historical_data['stochastic_d'].iloc[-2]}")
-       
+                # Print Stochastic Oscillator and Stochastic RSI values
+                print(f"{symbol} Stochastic Oscillator - %K: {historical_data['slowk'].iloc[-1]}, %D: {historical_data['slowd'].iloc[-1]}")
+                print(f"{symbol} Stochastic RSI - %K: {historical_data['fastk'].iloc[-1]}, %D: {historical_data['fastd'].iloc[-1]}")
+
                 # Make trading decisions for each symbol
                 if (
                     last_order_types[symbol] != 'LONG' and
