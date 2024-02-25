@@ -1,54 +1,38 @@
-import ccxt
+import pandas as pd
 import numpy as np
 import talib
+from binance.client import Client
+from datetime import datetime
+
+# Binance API credentials
+api_key = 'veiqd07BuRmMlxy3eeRLLKNyDnFrIphTcqgSM7XTRUCzQWTyqxK4sPtfVZioaVHi'
+api_secret = 'N4myBDNkkD203gxxpo8NLQgdZxdvzm7N7PpBjBU0DiTtctTLaFQEVev51N4P5R5g'
 
 # Initialize Binance client
-def initialize_binance():
-    api_key = input("veiqd07BuRmMlxy3eeRLLKNyDnFrIphTcqgSM7XTRUCzQWTyqxK4sPtfVZioaVHi")
-    api_secret = input("N4myBDNkkD203gxxpo8NLQgdZxdvzm7N7PpBjBU0DiTtctTLaFQEVev51N4P5R5g")
-    return ccxt.binance({
-        'apiKey': api_key,
-        'secret': api_secret,
-    })
+client = Client(api_key, api_secret)
 
-# Define function to fetch historical data
-def fetch_historical_data(symbol, timeframe, limit, exchange):
-    ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
-    return np.array([ohlcv[i][4] for i in range(len(ohlcv))])
+# Symbol and time interval
+symbol = 'BTCUSDT'
+interval = Client.KLINE_INTERVAL_1HOUR
+
+# Number of candles to retrieve
+limit = 100
+
+# Fetch historical data
+klines = client.get_klines(symbol=symbol, interval=interval, limit=limit)
+
+# Extracting closing prices
+closing_prices = [float(kline[4]) for kline in klines]
+
+# Converting timestamps to datetime objects
+timestamps = [datetime.utcfromtimestamp(kline[0] / 1000) for kline in klines]
+
+# Create a DataFrame
+data = pd.DataFrame({'timestamp': timestamps, 'close': closing_prices})
 
 # Calculate StochRSI
-def calculate_stochrsi(data, period):
-    rsi = talib.RSI(data, timeperiod=period)
-    stochrsi = talib.STOCHRSI(rsi, rsi, rsi, fastk_period=14, fastd_period=3)
-    return stochrsi
+stochrsi = talib.STOCHRSI(data['close'], timeperiod=14, fastk_period=3, fastd_period=3, fastd_matype=0)
 
-# Calculate Moving Average
-def calculate_ma(data, period):
-    return talib.SMA(data, timeperiod=period)
-
-# Main function
-def main():
-    symbol = 'BTC/USDT'
-    timeframe = '1h'
-    limit = 1000
-    stochrsi_period = 14
-    ma_period = 50
-    
-    # Initialize Binance client
-    binance = initialize_binance()
-    
-    # Fetch historical data
-    data = fetch_historical_data(symbol, timeframe, limit, binance)
-    
-    # Calculate indicators
-    stochrsi = calculate_stochrsi(data, stochrsi_period)
-    ma = calculate_ma(data, ma_period)
-    
-    # Print RSI and StochRSI values
-    print("RSI:", talib.RSI(data, timeperiod=stochrsi_period)[-1])
-    print("StochRSI K:", stochrsi[0][-1])
-    print("StochRSI D:", stochrsi[1][-1])
-
-if __name__ == "__main__":
-    main()
+# Print StochRSI, K, and D values
+print("StochRSI:", stochrsi)
 
