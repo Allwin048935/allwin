@@ -33,12 +33,6 @@ def fetch_ohlcv(symbol, timeframe, limit):
     # Calculate Stochastic Oscillator (%K and %D)
     df['slowk'], df['slowd'] = talib.STOCH(df['high'], df['low'], df['close'], fastk_period=stochastic_k_period, slowk_period=3, slowk_matype=0, slowd_period=3, slowd_matype=0)
 
-    # Calculate Stochastic RSI (%K and %D)
-    rsi_period = 14
-    stochrsi_period = 14
-    df['rsi'] = talib.RSI(df['close'], timeperiod=rsi_period)
-    df['fastk'], df['fastd'] = talib.STOCHRSI(df['rsi'], timeperiod=stochrsi_period, fastk_period=stochastic_k_period, fastd_period=3, fastd_matype=0)
-
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     df.set_index('timestamp', inplace=True)
     return df
@@ -56,26 +50,8 @@ def ema_strategy():
                     print(f"Not enough data for {symbol}. Waiting for more data...")
                     continue
 
-                # Fetch the latest candlestick for each symbol
-                latest_candle = exchange.fetch_ticker(symbol)
-
-                if 'close' not in latest_candle:
-                    print(f"Error: 'close' not found in the latest_candle for {symbol}")
-                    continue
-
-                latest_close = latest_candle.get('close')
-
-                # Check if latest_close is None or not a valid number
-                if latest_close is None or not isinstance(latest_close, (int, float)):
-                    print(f"Error: Invalid value for latest_close for {symbol}")
-                    continue
-
-                # Calculate the quantity based on the fixed USDT value
-                quantity = fixed_quantity_usdt / float(latest_close)
-
-                # Print Stochastic Oscillator and Stochastic RSI values
+                # Print Stochastic Oscillator values
                 print(f"{symbol} Stochastic Oscillator - %K: {historical_data['slowk'].iloc[-1]}, %D: {historical_data['slowd'].iloc[-1]}")
-                print(f"{symbol} Stochastic RSI - %K: {historical_data['fastk'].iloc[-1]}, %D: {historical_data['fastd'].iloc[-1]}")
 
                 # Make trading decisions for each symbol
                 if (
