@@ -1,87 +1,89 @@
-
-from binance.client import Client
-from binance.websockets import BinanceSocketManager
 import pandas as pd
-import numpy as np
+from binance.client import Client
+from ta.momentum import StochRSIIndicator
+from datetime import datetime
 
-# Initialize Binance client
+# Binance API credentials
 api_key = 'veiqd07BuRmMlxy3eeRLLKNyDnFrIphTcqgSM7XTRUCzQWTyqxK4sPtfVZioaVHi'
 api_secret = 'N4myBDNkkD203gxxpo8NLQgdZxdvzm7N7PpBjBU0DiTtctTLaFQEVev51N4P5R5g'
+
+# Initialize Binance client
 client = Client(api_key, api_secret)
 
-# Initialize Binance socket manager
-bm = BinanceSocketManager(client)
+# Symbol and time interval
+symbol = 'COTUSDT'  # Future contract symbol
+interval = Client.KLINE_INTERVAL_1HOUR
 
-# Function to calculate StochRSI
-def calculate_stochrsi(data, window):
-    if len(data) < window:
-        return np.nan, np.nan
+# Number of candles to retrieve
+limit = 100
 
-    close = data['close'].values
-    rsi = calculate_rsi(close, window)
-    stoch_rsi_k = (rsi - np.min(rsi)) / (np.max(rsi) - np.min(rsi))
-    stoch_rsi_d = np.mean(stoch_rsi_k[-3:])  # Smoothing with a 3-period simple moving average for %D
+# Fetch historical data
+klines = client.futures_klines(symbol=symbol, interval=interval, limit=limit)
 
-    return stoch_rsi_k[-1], stoch_rsi_d
+# Extracting closing prices and timestamps
+closing_prices = [float(kline[4]) for kline in klines]
+timestamps = [datetime.utcfromtimestamp(kline[0] / 1000) for kline in klines]
 
-# Function to calculate RSI
-def calculate_rsi(close, window):
-    delta = np.diff(close)
-    gain = delta * 0
-    loss = delta * 0
+# Create a DataFrame
+data = pd.DataFrame({'timestamp': timestamps, 'close': closing_prices})
 
-    gain[delta > 0] = delta[delta > 0]
-    loss[delta < 0] = -delta[delta < 0]
+# Calculate StochRSI
+indicator = StochRSIIndicator(close=data['close'], window=14, smooth1=3, smooth2=3)
+data['stochrsi'] = indicator.stochrsi()
+data['stochrsi_k'] = indicator.stochrsi_k()
+data['stochrsi_d'] = indicator.stochrsi_d()
 
-    avg_gain = np.zeros_like(close)
-    avg_loss = np.zeros_like(close)
-
-    avg_gain[window] = np.mean(gain[:window])
-    avg_loss[window] = np.mean(loss[:window])
-
-    for i in range(window + 1, len(close)):
-        avg_gain[i] = (avg_gain[i - 1] * (window - 1) + gain[i]) / window
-        avg_loss[i] = (avg_loss[i - 1] * (window - 1) + loss[i]) / window
-
-    rs = avg_gain / avg_loss
-    rsi = 100 - (100 / (1 + rs))
-
-    return rsi
-
-# Define callback function for handling Kline data
-def process_message(msg):
-    # Extract relevant data from the message
-    kline = msg['k']
-    candlestick = {
-        'timestamp': pd.to_datetime(kline['t'], unit='ms'),
-        'open': float(kline['o']),
-        'high': float(kline['h']),
-        'low': float(kline['l']),
-        'close': float(kline['c']),
-        'volume': float(kline['v'])
-    }
-
-    # Add received data to historical data DataFrame
-    global historical_data
-    historical_data = historical_data.append(candlestick, ignore_index=True)
-
-    # Calculate StochRSI if enough historical data is available
-    stoch_rsi_k, stoch_rsi_d = calculate_stochrsi(historical_data, 14)
+# Define a function to generate buy and sell signals
+def generate_signals(data):
+    signals = pd.DataFrame(index=data.index)
+    signals['price'] = data['close']
+    signals['stoch_rsi'] = data['stochrsi']
+    signals['stoch_rsi_k'] = data['stochrsi_k']
+    signals['stoch_rsi_d'] = data['stochrsi_d']
     
-    print("Received:", candlestick)
-    print("StochRSI %K:", stoch_rsi_k)
-    print("StochRSI %D:", stoch_rsi_d)
+    # Generate buy signals
+    signals['buy_signal'] = 0
+    signals.loc[(signals['stoch_rsi_k'] > signals['stoch_rsi_d']) & (signals['stoch_rsi_k'].shift(1) <= signals['stoch_rsi_d'].shift(1)), 'buy_signal'] = 1
+    
+    # Generate sell signals
+    signals['sell_signal'] = 0
+    signals.loc[(signals['stoch_rsi_k'] < signals['stoch_rsi_d']) & (signals['stoch_rsi_k'].shift(1) >= signals['stoch_rsi_d'].shift(1)), 'sell_signal'] = -1
+    
+    return signals
 
-    # Process the candlestick data further, e.g., execute trades based on StochRSI
+# Generate signals
+signals = generate_signals(data)
 
-# Subscribe to the WebSocket stream for Kline data
-symbol = 'btcusdt'
-interval = '15m'
-socket = f"{symbol}@kline_{interval}"
-conn_key = bm.start_kline_socket(symbol, process_message, interval=interval)
+# Get current price of the cryptocurrency
+current_price = float(client.futures_symbol_ticker(symbol=symbol)['price'])
 
-# Start the WebSocket
-bm.start()
+# Calculate the equivalent quantity of COTI for $100 USDT
+quantity_usdt = 100
+equivalent_quantity_coti = quantity_usdt / current_price
 
-# Keep the program running
-bm.join()
+# Implement a basic trading strategy
+position = 0  # 0 for no position, 1 for long, -1 for short
+for index, row in signals.iterrows():
+    if row['buy_signal'] == 1 and position != 1:
+        # Place buy order
+        order = client.futures_create_order(
+            symbol=symbol,
+            side=Client.SIDE_BUY,
+            type=Client.ORDER_TYPE_MARKET,
+            quantity=equivalent_quantity_coti,
+        )
+        position = 1
+        print("Buy Signal at:", row['price'])
+    elif row['sell_signal'] == -1 and position != -1:
+        # Place sell order
+        order = client.futures_create_order(
+            symbol=symbol,
+            side=Client.SIDE_SELL,
+            type=Client.ORDER_TYPE_MARKET,
+            quantity=equivalent_quantity_coti,
+        )
+        position = -1
+        print("Sell Signal at:", row['price'])
+
+# Ensure to close any open positions at the end of your trading period
+# Your code to close any open positions goes here
