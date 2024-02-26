@@ -11,7 +11,7 @@ api_secret = 'N4myBDNkkD203gxxpo8NLQgdZxdvzm7N7PpBjBU0DiTtctTLaFQEVev51N4P5R5g'
 client = Client(api_key, api_secret)
 
 # Symbol and time interval
-symbol = 'COTUSDT_PERP'  # Future contract symbol
+symbol = 'BTCUSDT'  # Future contract symbol
 interval = Client.KLINE_INTERVAL_1HOUR
 
 # Number of candles to retrieve
