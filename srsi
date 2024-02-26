@@ -32,9 +32,12 @@ fixed_quantity_usdt = 15
 def fetch_ohlcv(symbol, timeframe, limit):
     try:
         # Fetch historical data
+        print(f"Fetching OHLCV data for {symbol}...")
         ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
         if ohlcv is None or len(ohlcv) == 0:
             raise ValueError("No data fetched")
+
+        print(f"Fetched {len(ohlcv)} data points for {symbol}")
 
         df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
@@ -42,6 +45,7 @@ def fetch_ohlcv(symbol, timeframe, limit):
         if df.empty:
             raise ValueError("Empty DataFrame")
 
+        print("Calculating EMAs...")
         # Calculate short, medium, and long EMAs
         df['short_ema'] = calculate_ema(df, short_ema_period)
         df['medium_ema'] = calculate_ema(df, medium_ema_period)  # Calculate medium EMA
@@ -49,6 +53,7 @@ def fetch_ohlcv(symbol, timeframe, limit):
 
         df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
         df.set_index('timestamp', inplace=True)
+        print("EMA calculation completed.")
         return df
     except Exception as e:
         print(f"Error fetching OHLCV data for {symbol}: {e}")
