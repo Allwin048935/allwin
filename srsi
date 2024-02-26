@@ -33,7 +33,14 @@ def fetch_ohlcv(symbol, timeframe, limit):
     try:
         # Fetch historical data
         ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
+        if ohlcv is None or len(ohlcv) == 0:
+            raise ValueError("No data fetched")
+
         df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+
+        # Check if DataFrame is empty
+        if df.empty:
+            raise ValueError("Empty DataFrame")
 
         # Calculate short, medium, and long EMAs
         df['short_ema'] = calculate_ema(df, short_ema_period)
@@ -45,6 +52,8 @@ def fetch_ohlcv(symbol, timeframe, limit):
         return df
     except Exception as e:
         print(f"Error fetching OHLCV data for {symbol}: {e}")
+        return None  # Return None in case of an error
+
 
 # Initialize Binance client
 client = Client(BINANCE_API_KEY, BINANCE_API_SECRET)
