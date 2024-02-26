@@ -57,7 +57,7 @@ def fetch_ohlcv(symbol, timeframe, limit):
 
         df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
         df.set_index('timestamp', inplace=True)
-        print("EMA calculation completed.")
+        #print("EMA calculation completed.")
         return df
     except Exception as e:
         print(f"Error fetching OHLCV data for {symbol}: {e}")
