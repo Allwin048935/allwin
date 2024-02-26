@@ -1,0 +1,63 @@
+from binance.client import Client
+import pandas as pd
+import numpy as np
+
+# Initialize Binance client
+api_key = 'veiqd07BuRmMlxy3eeRLLKNyDnFrIphTcqgSM7XTRUCzQWTyqxK4sPtfVZioaVHi'
+api_secret = 'N4myBDNkkD203gxxpo8NLQgdZxdvzm7N7PpBjBU0DiTtctTLaFQEVev51N4P5R5g'
+client = Client(api_key, api_secret)
+
+# Fetch Kline data
+def fetch_kline_data(symbol, interval, limit):
+    klines = client.get_klines(symbol=symbol, interval=interval, limit=limit)
+    data = pd.DataFrame(klines, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume', 'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'])
+    data['timestamp'] = pd.to_datetime(data['timestamp'], unit='ms')
+    data.set_index('timestamp', inplace=True)
+    return data
+
+# Calculate StochRSI
+def calculate_stochrsi(data, window):
+    delta = data['close'].diff()
+    gain = delta.where(delta > 0, 0)
+    loss = -delta.where(delta < 0, 0)
+
+    rsi_gain = gain.rolling(window=window, min_periods=1).mean()
+    rsi_loss = loss.rolling(window=window, min_periods=1).mean()
+
+    rsi = rsi_gain / (rsi_gain + rsi_loss)
+    stoch_rsi = (rsi - rsi.rolling(window=window, min_periods=1).min()) / (rsi.rolling(window=window, min_periods=1).max() - rsi.rolling(window=window, min_periods=1).min())
+    
+    k_values = stoch_rsi
+    d_values = k_values.rolling(window=3).mean()  # Smoothing with a 3-period simple moving average for D
+    
+    data['stoch_rsi_k'] = k_values
+    data['stoch_rsi_d'] = d_values
+    return data
+
+# Define trading strategy
+def execute_trades(data):
+    # Define your trading strategy here
+    # Example: Buy when StochRSI crosses above 0.2, sell when it crosses below 0.8
+    pass
+
+# Main function
+def main():
+    symbol = 'BTCUSDT'
+    interval = Client.KLINE_INTERVAL_15MINUTE  # Change to 15-minute interval
+    limit = 100
+
+    # Fetch Kline data
+    kline_data = fetch_kline_data(symbol, interval, limit)
+
+    # Calculate StochRSI
+    stochrsi_window = 14
+    kline_data = calculate_stochrsi(kline_data, stochrsi_window)
+
+    # Print K and D values
+    print(kline_data[['stoch_rsi_k', 'stoch_rsi_d']])
+
+    # Execute trades based on strategy
+    execute_trades(kline_data)
+
+if __name__ == "__main__":
+    main()
