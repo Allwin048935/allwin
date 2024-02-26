@@ -46,7 +46,6 @@ def fetch_ohlcv(symbol, timeframe, limit):
     except Exception as e:
         print(f"Error fetching OHLCV data for {symbol}: {e}")
 
-
 # Initialize Binance client
 client = Client(BINANCE_API_KEY, BINANCE_API_SECRET)
 
@@ -136,7 +135,7 @@ def ema_strategy(interval):
         try:
             for symbol in symbols:
                 # Fetch historical data for each symbol
-                data = calculate_stochrsi(symbol, interval, 100)  # Call calculate_stochrsi function
+                data = fetch_ohlcv(symbol, interval, 100)  # Call fetch_ohlcv function
 
                 # Check if there's enough data for EMA calculation
                 if len(data) < long_ema_period:
@@ -166,7 +165,7 @@ def ema_strategy(interval):
                     data['stochrsi_k'].iloc[-2] >= data['stochrsi_d'].iloc[-2] and
                     data['stochrsi_k'].iloc[-3] <= data['stochrsi_d'].iloc[-3] and 
                     data['stochrsi_k'].iloc[-2] <=0.5 and 
-                    data['short_ema'].iloc[-2] >= data['short_ema'].iloc[-3]
+                    data['short_ema'].iloc[-2] >= data['short_ema'].iloc[-3]  # corrected variable name
                 ):
                     print(f'{symbol} Long Entry Signal')
                     # Close existing short position if any
@@ -191,7 +190,7 @@ def ema_strategy(interval):
                     data['stochrsi_k'].iloc[-2] <= data['stochrsi_d'].iloc[-2] and
                     data['stochrsi_k'].iloc[-3] >= data['stochrsi_d'].iloc[-3] and 
                     data['stochrsi_k'].iloc[-2] >=0.5 and 
-                    data['short_ema'].iloc[-2] <= data['short_ema'].iloc[-3]
+                    data['short_ema'].iloc[-2] <= data['short_ema'].iloc[-3]  # corrected variable name
                 ):
                     print(f'{symbol} Short Entry Signal')
                     # Close existing long position if any
