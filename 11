@@ -1,3 +1,4 @@
+
 from binance.client import Client
 from binance.websockets import BinanceSocketManager
 import pandas as pd
@@ -13,6 +14,7 @@ bm = BinanceSocketManager(client)
 
 # Function to calculate StochRSI
 def calculate_stochrsi(data, window):
+    print("Data length:", len(data))
     if len(data) < window:
         return np.nan, np.nan
 
