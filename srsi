@@ -176,6 +176,7 @@ def ema_strategy(interval):
                 # Make trading decisions for each symbol
                 if (
                     last_order_types[symbol] != 'LONG' and
+                    'stochrsi_k' in data.columns and 'stochrsi_d' in data.columns and
                     data['stochrsi_k'].iloc[-2] >= data['stochrsi_d'].iloc[-2] and
                     data['stochrsi_k'].iloc[-3] <= data['stochrsi_d'].iloc[-3] and
                     data['stochrsi_k'].iloc[-2] <= 0.5 and
@@ -192,6 +193,7 @@ def ema_strategy(interval):
 
                 elif (
                     last_order_types[symbol] == 'LONG' and
+                    'stochrsi_k' in data.columns and 'stochrsi_d' in data.columns and
                     data['stochrsi_k'].iloc[-3] >= data['stochrsi_d'].iloc[-3] and
                     data['stochrsi_k'].iloc[-2] <= data['stochrsi_d'].iloc[-2]
                 ):
@@ -201,6 +203,7 @@ def ema_strategy(interval):
 
                 elif (
                     last_order_types[symbol] != 'SHORT' and
+                    'stochrsi_k' in data.columns and 'stochrsi_d' in data.columns and
                     data['stochrsi_k'].iloc[-2] <= data['stochrsi_d'].iloc[-2] and
                     data['stochrsi_k'].iloc[-3] >= data['stochrsi_d'].iloc[-3] and
                     data['stochrsi_k'].iloc[-2] >= 0.5 and
@@ -217,6 +220,7 @@ def ema_strategy(interval):
 
                 elif (
                     last_order_types[symbol] == 'SHORT' and
+                    'stochrsi_k' in data.columns and 'stochrsi_d' in data.columns and
                     data['stochrsi_k'].iloc[-3] <= data['stochrsi_d'].iloc[-3] and
                     data['stochrsi_k'].iloc[-2] >= data['stochrsi_d'].iloc[-2]
                 ):
@@ -233,3 +237,4 @@ def ema_strategy(interval):
 
 # Run the trading strategy
 ema_strategy(Client.KLINE_INTERVAL_1HOUR)
+
