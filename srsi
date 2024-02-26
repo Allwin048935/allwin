@@ -34,7 +34,7 @@ def fetch_ohlcv(symbol, timeframe, limit):
     timestamp = int(time.time() * 1000)
     
     # Fetch historical data
-    ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=100, params={'timestamp': timestamp})
+    ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=100)
     df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
     # Calculate short, medium, and long EMAs
