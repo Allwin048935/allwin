@@ -12,9 +12,11 @@ client = Client(api_key, api_secret)
 # Initialize Binance socket manager
 bm = BinanceSocketManager(client)
 
+# Initialize DataFrame to store historical data
+historical_data = pd.DataFrame(columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+
 # Function to calculate StochRSI
 def calculate_stochrsi(data, window):
-    print("Data length:", len(data))
     if len(data) < window:
         return np.nan, np.nan
 
@@ -44,9 +46,12 @@ def process_message(msg):
         'volume': float(kline['v'])
     }
 
-    # Calculate StochRSI
-    df = pd.DataFrame([candlestick], columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-    stoch_rsi_k, stoch_rsi_d = calculate_stochrsi(df, 14)
+    # Add received data to historical data DataFrame
+    global historical_data
+    historical_data = historical_data.append(candlestick, ignore_index=True)
+
+    # Calculate StochRSI if enough historical data is available
+    stoch_rsi_k, stoch_rsi_d = calculate_stochrsi(historical_data, 14)
     
     print("Received:", candlestick)
     print("StochRSI %K:", stoch_rsi_k)
