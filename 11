@@ -12,26 +12,41 @@ client = Client(api_key, api_secret)
 # Initialize Binance socket manager
 bm = BinanceSocketManager(client)
 
-# Initialize DataFrame to store historical data
-historical_data = pd.DataFrame(columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-
 # Function to calculate StochRSI
 def calculate_stochrsi(data, window):
     if len(data) < window:
         return np.nan, np.nan
 
-    delta = data['close'].diff()
-    gain = delta.where(delta > 0, 0)
-    loss = -delta.where(delta < 0, 0)
+    close = data['close'].values
+    rsi = calculate_rsi(close, window)
+    stoch_rsi_k = (rsi - np.min(rsi)) / (np.max(rsi) - np.min(rsi))
+    stoch_rsi_d = np.mean(stoch_rsi_k[-3:])  # Smoothing with a 3-period simple moving average for %D
 
-    rsi_gain = gain.rolling(window=window, min_periods=1).mean()
-    rsi_loss = loss.rolling(window=window, min_periods=1).mean()
+    return stoch_rsi_k[-1], stoch_rsi_d
 
-    rsi = rsi_gain / (rsi_gain + rsi_loss)
-    stoch_rsi_k = (rsi - rsi.rolling(window=window, min_periods=1).min()) / (rsi.rolling(window=window, min_periods=1).max() - rsi.rolling(window=window, min_periods=1).min())
-    stoch_rsi_d = stoch_rsi_k.rolling(window=3).mean()  # Smoothing with a 3-period simple moving average for %D
-    
-    return stoch_rsi_k.iloc[-1], stoch_rsi_d.iloc[-1]
+# Function to calculate RSI
+def calculate_rsi(close, window):
+    delta = np.diff(close)
+    gain = delta * 0
+    loss = delta * 0
+
+    gain[delta > 0] = delta[delta > 0]
+    loss[delta < 0] = -delta[delta < 0]
+
+    avg_gain = np.zeros_like(close)
+    avg_loss = np.zeros_like(close)
+
+    avg_gain[window] = np.mean(gain[:window])
+    avg_loss[window] = np.mean(loss[:window])
+
+    for i in range(window + 1, len(close)):
+        avg_gain[i] = (avg_gain[i - 1] * (window - 1) + gain[i]) / window
+        avg_loss[i] = (avg_loss[i - 1] * (window - 1) + loss[i]) / window
+
+    rs = avg_gain / avg_loss
+    rsi = 100 - (100 / (1 + rs))
+
+    return rsi
 
 # Define callback function for handling Kline data
 def process_message(msg):
