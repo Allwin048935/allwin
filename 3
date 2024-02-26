@@ -6,6 +6,10 @@ from ta.momentum import StochRSIIndicator
 from datetime import datetime
 from config import BINANCE_API_KEY, BINANCE_API_SECRET, symbols
 
+# Function to calculate EMA
+def calculate_ema(df, period, column='close'):
+    return df[column].ewm(span=period, adjust=False).mean()
+
 # Create a Binance Futures client
 exchange = ccxt.binance({
     'apiKey': BINANCE_API_KEY,
@@ -17,8 +21,8 @@ exchange = ccxt.binance({
 })
 
 # Define EMA strategy parameters
-short_ema_period = 7
-medium_ema_period = 20  # Define the period for the medium EMA
+short_ema_period = 5
+medium_ema_period = 20
 long_ema_period = 50
 
 # Track the last order type placed for each symbol
@@ -30,45 +34,45 @@ fixed_quantity_usdt = 15
 
 # Function to fetch historical data for futures with EMA calculation
 def fetch_ohlcv(symbol, timeframe, limit):
-    ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=100)
-    df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    try:
+        ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
+        if ohlcv is None or len(ohlcv) == 0:
+            raise ValueError(f"No data fetched for {symbol}")
+        
+        df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+        
+        if df.empty:
+            raise ValueError(f"Empty DataFrame for {symbol}")
+        
+        df['short_ema'] = calculate_ema(df, short_ema_period)
+        df['medium_ema'] = calculate_ema(df, medium_ema_period)
+        df['long_ema'] = calculate_ema(df, long_ema_period)
 
-    # Calculate short, medium, and long EMAs
-    df['short_ema'] = calculate_ema(df, short_ema_period)
-    df['medium_ema'] = calculate_ema(df, medium_ema_period)  # Calculate medium EMA
-    df['long_ema'] = calculate_ema(df, long_ema_period)
-
-    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-    df.set_index('timestamp', inplace=True)
-    return df
-
+        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+        df.set_index('timestamp', inplace=True)
+        
+        return df
+    except Exception as e:
+        print(f"Error fetching OHLCV data for {symbol}: {e}")
+        return None
 
 # Initialize Binance client
 client = Client(BINANCE_API_KEY, BINANCE_API_SECRET)
 
+# Function to calculate Stochastic RSI
 def calculate_stochrsi(symbol, interval, limit):
-    # Fetch historical data
-    klines = client.get_klines(symbol=symbol, interval=interval, limit=100)
-
-    # Extracting closing prices and timestamps
-    closing_prices = [float(kline[4]) for kline in klines]
-    timestamps = [datetime.utcfromtimestamp(kline[0] / 1000) for kline in klines]
-
-    # Create a DataFrame
-    data = pd.DataFrame({'timestamp': timestamps, 'close': closing_prices})
-
-    # Calculate StochRSI
-    indicator = StochRSIIndicator(close=data['close'], window=14, smooth1=3, smooth2=3)
-    data['stochrsi'] = indicator.stochrsi()
-    data['stochrsi_k'] = indicator.stochrsi_k()
-    data['stochrsi_d'] = indicator.stochrsi_d()
-
-    # Return the DataFrame
-    return data
-
-# Function to calculate EMA
-def calculate_ema(df, period, column='close'):
-    return df[column].ewm(span=period, adjust=False).mean()
+    try:
+        klines = client.get_klines(symbol=symbol, interval=interval, limit=limit)
+        closing_prices = [float(kline[4]) for kline in klines]
+        timestamps = [datetime.utcfromtimestamp(kline[0] / 1000) for kline in klines]
+        data = pd.DataFrame({'timestamp': timestamps, 'close': closing_prices})
+        indicator = StochRSIIndicator(close=data['close'], window=14, smooth1=3, smooth2=3)
+        data['stochrsi'] = indicator.stochrsi()
+        data['stochrsi_k'] = indicator.stochrsi_k()
+        data['stochrsi_d'] = indicator.stochrsi_d()
+        return data
+    except Exception as e:
+        print(f"Error calculating StochRSI for {symbol}: {e}")
 
 # Function to place a market buy order
 def place_market_buy_order(symbol, quantity):
@@ -125,15 +129,12 @@ def ema_strategy(interval):
     while True:
         try:
             for symbol in symbols:
-                # Fetch historical data for each symbol
-                data = calculate_stochrsi(symbol, interval, 100)  # Call calculate_stochrsi function
+                data = fetch_ohlcv(symbol, interval, 100)
 
-                # Check if there's enough data for EMA calculation
-                if len(data) < long_ema_period:
+                if data is None or len(data) < long_ema_period:
                     print(f"Not enough data for {symbol}. Waiting for more data...")
                     continue
 
-                # Fetch the latest candlestick for each symbol
                 latest_candle = exchange.fetch_ticker(symbol)
 
                 if 'close' not in latest_candle:
@@ -142,69 +143,65 @@ def ema_strategy(interval):
 
                 latest_close = latest_candle.get('close')
 
-                # Check if latest_close is None or not a valid number
                 if latest_close is None or not isinstance(latest_close, (int, float)):
                     print(f"Error: Invalid value for latest_close for {symbol}")
                     continue
 
-                # Calculate the quantity based on the fixed USDT value
                 quantity = fixed_quantity_usdt / float(latest_close)
 
-                # Make trading decisions for each symbol
                 if (
                     last_order_types[symbol] != 'LONG' and
-                    (data['stochrsi_k'].iloc[-2] > data['stochrsi_d'].iloc[-2] and
-                    data['stochrsi_k'].iloc[-3] <= data['stochrsi_d'].iloc[-3]) 
+                    'stochrsi_k' in data.columns and 'stochrsi_d' in data.columns and
+                    data['stochrsi_k'].iloc[-2] >= data['stochrsi_d'].iloc[-2] and
+                    data['stochrsi_k'].iloc[-3] <= data['stochrsi_d'].iloc[-3] and
+                    data['stochrsi_k'].iloc[-2] <= 0.5 and
+                    data['short_ema'].iloc[-2] >= data['medium_ema'].iloc[-2]
                 ):
                     print(f'{symbol} Long Entry Signal')
-                    # Close existing short position if any
                     if open_positions[symbol] == 'SHORT':
                         close_short_position(symbol, quantity)
-                    # Place a market buy order to enter long position
                     place_market_buy_order(symbol, quantity)
                     open_positions[symbol] = 'LONG'
                     last_order_types[symbol] = 'LONG'
 
                 elif (
                     last_order_types[symbol] == 'LONG' and
-                    (data['stochrsi_k'].iloc[-3] >= (data['stochrsi_d'].iloc[-3]) and
-                    data['stochrsi_k'].iloc[-2] < (data['stochrsi_d'].iloc[-2]))
+                    'stochrsi_k' in data.columns and 'stochrsi_d' in data.columns and
+                    data['stochrsi_k'].iloc[-3] >= data['stochrsi_d'].iloc[-3] and
+                    data['stochrsi_k'].iloc[-2] <= data['stochrsi_d'].iloc[-2]
                 ):
                     print(f'{symbol} Long Exit Signal')
-                    # Close existing long position if short EMA crosses below long EMA
                     close_long_position(symbol, quantity)
-                    open_positions[symbol] = None
 
                 elif (
                     last_order_types[symbol] != 'SHORT' and
-                    (data['stochrsi_k'].iloc[-2] > data['stochrsi_d'].iloc[-2] and
-                    data['stochrsi_k'].iloc[-3] <= data['stochrsi_d'].iloc[-3]) 
+                    'stochrsi_k' in data.columns and 'stochrsi_d' in data.columns and
+                    data['stochrsi_k'].iloc[-2] <= data['stochrsi_d'].iloc[-2] and
+                    data['stochrsi_k'].iloc[-3] >= data['stochrsi_d'].iloc[-3] and
+                    data['stochrsi_k'].iloc[-2] >= 0.5 and
+                    data['short_ema'].iloc[-2] <= data['medium_ema'].iloc[-2]
                 ):
                     print(f'{symbol} Short Entry Signal')
-                    # Close existing long position if any
                     if open_positions[symbol] == 'LONG':
                         close_long_position(symbol, quantity)
-                    # Place a market sell order to enter short position
                     place_market_sell_order(symbol, quantity)
                     open_positions[symbol] = 'SHORT'
                     last_order_types[symbol] = 'SHORT'
 
                 elif (
                     last_order_types[symbol] == 'SHORT' and
-                    (data['stochrsi_k'].iloc[-3] <= (data['stochrsi_d'].iloc[-3]) and
-                    data['stochrsi_k'].iloc[-2] > (data['stochrsi_d'].iloc[-2]))
+                    'stochrsi_k' in data.columns and 'stochrsi_d' in data.columns and
+                    data['stochrsi_k'].iloc[-3] <= data['stochrsi_d'].iloc[-3] and
+                    data['stochrsi_k'].iloc[-2] >= data['stochrsi_d'].iloc[-2]
                 ):
                     print(f'{symbol} Short Exit Signal')
-                    # Close existing short position if short EMA crosses above long EMA
                     close_short_position(symbol, quantity)
-                    open_positions[symbol] = None
 
-            # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(60)
 
         except Exception as e:
             print(f'An error occurred: {e}')
-            time.sleep(60)  # Wait for a minute before trying again
+            time.sleep(60)
 
 # Run the trading strategy
 ema_strategy(Client.KLINE_INTERVAL_1HOUR)
