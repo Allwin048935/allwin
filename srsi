@@ -46,6 +46,7 @@ def fetch_ohlcv(symbol, timeframe, limit):
     except Exception as e:
         print(f"Error fetching OHLCV data for {symbol}: {e}")
 
+
 # Initialize Binance client
 client = Client(BINANCE_API_KEY, BINANCE_API_SECRET)
 
