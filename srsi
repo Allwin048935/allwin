@@ -30,47 +30,50 @@ fixed_quantity_usdt = 15
 
 # Function to fetch historical data for futures with EMA calculation
 def fetch_ohlcv(symbol, timeframe, limit):
-    # Generate timestamp
-    timestamp = int(time.time() * 1000)
-    
-    # Fetch historical data
-    ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=100)
-    df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    try:
+        # Fetch historical data
+        ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
+        df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
-    # Calculate short, medium, and long EMAs
-    df['short_ema'] = calculate_ema(df, short_ema_period)
-    df['medium_ema'] = calculate_ema(df, medium_ema_period)  # Calculate medium EMA
-    df['long_ema'] = calculate_ema(df, long_ema_period)
+        # Calculate short, medium, and long EMAs
+        df['short_ema'] = calculate_ema(df, short_ema_period)
+        df['medium_ema'] = calculate_ema(df, medium_ema_period)  # Calculate medium EMA
+        df['long_ema'] = calculate_ema(df, long_ema_period)
 
-    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-    df.set_index('timestamp', inplace=True)
-    return df
+        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+        df.set_index('timestamp', inplace=True)
+        return df
+    except Exception as e:
+        print(f"Error fetching OHLCV data for {symbol}: {e}")
 
 # Initialize Binance client
 client = Client(BINANCE_API_KEY, BINANCE_API_SECRET)
 
 def calculate_stochrsi(symbol, interval, limit):
-    # Generate timestamp
-    timestamp = int(time.time() * 1000)
-    
-    # Fetch historical data
-    klines = client.get_klines(symbol=symbol, interval=interval, limit=100, params={'timestamp': timestamp})
+    try:
+        # Generate timestamp
+        timestamp = int(time.time() * 1000)
+        
+        # Fetch historical data
+        klines = client.get_klines(symbol=symbol, interval=interval, limit=limit)
 
-    # Extracting closing prices and timestamps
-    closing_prices = [float(kline[4]) for kline in klines]
-    timestamps = [datetime.utcfromtimestamp(kline[0] / 1000) for kline in klines]
+        # Extracting closing prices and timestamps
+        closing_prices = [float(kline[4]) for kline in klines]
+        timestamps = [datetime.utcfromtimestamp(kline[0] / 1000) for kline in klines]
 
-    # Create a DataFrame
-    data = pd.DataFrame({'timestamp': timestamps, 'close': closing_prices})
+        # Create a DataFrame
+        data = pd.DataFrame({'timestamp': timestamps, 'close': closing_prices})
 
-    # Calculate StochRSI
-    indicator = StochRSIIndicator(close=data['close'], window=14, smooth1=3, smooth2=3)
-    data['stochrsi'] = indicator.stochrsi()
-    data['stochrsi_k'] = indicator.stochrsi_k()
-    data['stochrsi_d'] = indicator.stochrsi_d()
+        # Calculate StochRSI
+        indicator = StochRSIIndicator(close=data['close'], window=14, smooth1=3, smooth2=3)
+        data['stochrsi'] = indicator.stochrsi()
+        data['stochrsi_k'] = indicator.stochrsi_k()
+        data['stochrsi_d'] = indicator.stochrsi_d()
 
-    # Return the DataFrame
-    return data
+        # Return the DataFrame
+        return data
+    except Exception as e:
+        print(f"Error calculating StochRSI for {symbol}: {e}")
 
 # Function to calculate EMA
 def calculate_ema(df, period, column='close'):
