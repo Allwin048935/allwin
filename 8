@@ -174,7 +174,7 @@ def ema_strategy():
                     last_order_types[symbol] != 'LONG' and
                     historical_data['stoch_rsi_k'].iloc[-2] >= historical_data['stoch_rsi_d'].iloc[-2] and
                     historical_data['stoch_rsi_k'].iloc[-3] <= historical_data['stoch_rsi_d'].iloc[-3] and
-                    historical_data['stoch_rsi_k'].iloc[-2] <= 0.5 and
+                    historical_data['stoch_rsi_k'].iloc[-2] <= 0.3 and
                     historical_data['short_ema'].iloc[-2] >= historical_data['short_ema'].iloc[-3]
                 ):
                     print(f'{symbol} Long Entry Signal')
@@ -188,7 +188,6 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] == 'LONG' and
-                    historical_data['stoch_rsi_k'].iloc[-3] >= historical_data['stoch_rsi_d'].iloc[-3] and
                     historical_data['stoch_rsi_k'].iloc[-2] <= historical_data['stoch_rsi_d'].iloc[-2] and
                     historical_data['short_ema'].iloc[-2] <= historical_data['short_ema'].iloc[-3]
                 ):
@@ -200,7 +199,7 @@ def ema_strategy():
                     last_order_types[symbol] != 'SHORT' and
                     historical_data['stoch_rsi_k'].iloc[-2] <= historical_data['stoch_rsi_d'].iloc[-2] and
                     historical_data['stoch_rsi_k'].iloc[-3] >= historical_data['stoch_rsi_d'].iloc[-3] and
-                    historical_data['stoch_rsi_k'].iloc[-2] >= 0.5 and
+                    historical_data['stoch_rsi_k'].iloc[-2] >= 0.7 and
                     historical_data['short_ema'].iloc[-2] <= historical_data['short_ema'].iloc[-3]
                 ):
                     print(f'{symbol} Short Entry Signal')
@@ -214,7 +213,6 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] == 'SHORT' and
-                    historical_data['stoch_rsi_k'].iloc[-3] <= historical_data['stoch_rsi_d'].iloc[-3] and
                     historical_data['stoch_rsi_k'].iloc[-2] >= historical_data['stoch_rsi_d'].iloc[-2] and
                     historical_data['short_ema'].iloc[-2] >= historical_data['short_ema'].iloc[-3]
                 ):
