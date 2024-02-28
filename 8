@@ -176,9 +176,62 @@ def ema_strategy():
                 stoch_rsi_k_value = historical_data['stoch_rsi_k'].iloc[-1]
                 stoch_rsi_d_value = historical_data['stoch_rsi_d'].iloc[-1]
                 print(f"StochRSI K for {symbol}: {stoch_rsi_k_value}, StochRSI D for {symbol}: {stoch_rsi_d_value}")
+                
+                # Make trading decisions for each symbol
+                if (
+                    last_order_types[symbol] != 'LONG' and
+                    'stochrsi_k' in data.columns and 'stochrsi_d' in data.columns and
+                    data['stochrsi_k'].iloc[-2] >= data['stochrsi_d'].iloc[-2] and
+                    data['stochrsi_k'].iloc[-3] <= data['stochrsi_d'].iloc[-3] and
+                    data['stochrsi_k'].iloc[-2] <= 0.5 and
+                    data['short_ema'].iloc[-2] >= data['short_ema'].iloc[-3]  # corrected variable name
+                ):
+                    print(f'{symbol} Long Entry Signal')
+                    # Close existing short position if any
+                    if open_positions[symbol] == 'SHORT':
+                        close_short_position(symbol, quantity)
+                    # Place a market buy order to enter long position
+                    place_market_buy_order(symbol, quantity)
+                    open_positions[symbol] = 'LONG'
+                    last_order_types[symbol] = 'LONG'
 
-                
-                
+                elif (
+                    last_order_types[symbol] == 'LONG' and
+                    'stochrsi_k' in data.columns and 'stochrsi_d' in data.columns and
+                    data['stochrsi_k'].iloc[-3] >= data['stochrsi_d'].iloc[-3] and
+                    data['stochrsi_k'].iloc[-2] <= data['stochrsi_d'].iloc[-2]
+                ):
+                    print(f'{symbol} Long Exit Signal')
+                    # Close existing long position if short EMA crosses below long EMA
+                    close_long_position(symbol, quantity)
+
+                elif (
+                    last_order_types[symbol] != 'SHORT' and
+                    'stochrsi_k' in data.columns and 'stochrsi_d' in data.columns and
+                    data['stochrsi_k'].iloc[-2] <= data['stochrsi_d'].iloc[-2] and
+                    data['stochrsi_k'].iloc[-3] >= data['stochrsi_d'].iloc[-3] and
+                    data['stochrsi_k'].iloc[-2] >= 0.5 and
+                    data['short_ema'].iloc[-2] <= data['short_ema'].iloc[-3]  # corrected variable name
+                ):
+                    print(f'{symbol} Short Entry Signal')
+                    # Close existing long position if any
+                    if open_positions[symbol] == 'LONG':
+                        close_long_position(symbol, quantity)
+                    # Place a market sell order to enter short position
+                    place_market_sell_order(symbol, quantity)
+                    open_positions[symbol] = 'SHORT'
+                    last_order_types[symbol] = 'SHORT'
+
+                elif (
+                    last_order_types[symbol] == 'SHORT' and
+                    'stochrsi_k' in data.columns and 'stochrsi_d' in data.columns and
+                    data['stochrsi_k'].iloc[-3] <= data['stochrsi_d'].iloc[-3] and
+                    data['stochrsi_k'].iloc[-2] >= data['stochrsi_d'].iloc[-2]
+                ):
+                    print(f'{symbol} Short Exit Signal')
+                    # Close existing short position if short EMA crosses above long EMA
+                    close_short_position(symbol, quantity)
+
             # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(60)
 
