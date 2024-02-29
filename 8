@@ -224,6 +224,11 @@ def ema_strategy():
                     # Close existing short position if short EMA crosses above long EMA
                     close_short_position(symbol, quantity)
 
+
+ # Print K and D values
+                print(f"K value for {symbol}: {historical_data['stoch_rsi_k'].iloc[-2]}")
+                print(f"D value for {symbol}: {historical_data['stoch_rsi_d'].iloc[-2]}")
+
             # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(60)
 
