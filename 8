@@ -157,10 +157,10 @@ def ema_strategy():
                 long_ema_values = historical_data['long_ema']
 
                 # Print EMA values
-                print(f'{symbol} EMA Values:')
-                print('Short EMA 2:', short_ema_values.iloc[-2])
-                print('Short EMA 3:', short_ema_values.iloc[-3])
-                print('Long EMA:', long_ema_values.iloc[-1])
+                #print(f'{symbol} EMA Values:')
+                #print('Short EMA 2:', short_ema_values.iloc[-2])
+                #print('Short EMA 3:', short_ema_values.iloc[-3])
+                #print('Long EMA:', long_ema_values.iloc[-1])
 
                 # Fetch the latest candlestick for each symbol
                 latest_candle = exchange.fetch_ticker(symbol)
