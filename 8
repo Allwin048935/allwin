@@ -70,7 +70,6 @@ def fetch_ohlcv(symbol, timeframe, limit):
     ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
-    # Calculate short, medium, and long EMAs
     df['short_ema'] = calculate_ema(df, short_ema_period)
     df['medium_ema'] = calculate_ema(df, medium_ema_period)
     df['long_ema'] = calculate_ema(df, long_ema_period)
@@ -158,11 +157,11 @@ def ema_strategy():
                 long_ema_values = historical_data['long_ema']
 
                 # Print EMA values
-                # print(f'{symbol} EMA Values:')
+                print(f'{symbol} EMA Values:')
                 print('Short EMA 2:', short_ema_values.iloc[-2])
                 print('Short EMA 3:', short_ema_values.iloc[-3])
-                # print('Long EMA:', long_ema_values.iloc[-1])
-                
+                print('Long EMA:', long_ema_values.iloc[-1])
+
                 # Fetch the latest candlestick for each symbol
                 latest_candle = exchange.fetch_ticker(symbol)
 
@@ -221,9 +220,9 @@ def ema_strategy():
                     (
                         (
                             (historical_data['stoch_rsi_k'].iloc[-2] < historical_data['stoch_rsi_d'].iloc[-2] and
-                            historical_data['stoch_rsi_k'].iloc[-3] > historical_data['stoch_rsi_d'].iloc[-3]) ]) or
+                            historical_data['stoch_rsi_k'].iloc[-3] > historical_data['stoch_rsi_d'].iloc[-3]) or
                             (historical_data['stoch_rsi_k'].iloc[-3] < historical_data['stoch_rsi_d'].iloc[-3] and
-                            historical_data['stoch_rsi_k'].iloc[-4] > historical_data['stoch_rsi_d'].iloc[-4]
+                            historical_data['stoch_rsi_k'].iloc[-4] > historical_data['stoch_rsi_d'].iloc[-4])
                         ) and
                         historical_data['stoch_rsi_k'].iloc[-2] > 0.7 and
                         historical_data['short_ema'].iloc[-2] < historical_data['short_ema'].iloc[-3]
