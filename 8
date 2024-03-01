@@ -191,9 +191,7 @@ def ema_strategy():
                         ) and
                         historical_data['stoch_rsi_k'].iloc[-2] < 0.3 and
                         short_ema_values.iloc[-2] > short_ema_values.iloc[-3]
-                    )
-                    and historical_data['short_ema'].iloc[-2] > historical_data['medium_ema'].iloc[-2]
-                    and historical_data['medium_ema'].iloc[-2] > historical_data['long_ema'].iloc[-2]
+                    
                 ):
                     print(f'{symbol} Long Entry Signal')
                     # Close existing short position if any
@@ -224,11 +222,8 @@ def ema_strategy():
                             (historical_data['stoch_rsi_k'].iloc[-3] < historical_data['stoch_rsi_d'].iloc[-3] and
                             historical_data['stoch_rsi_k'].iloc[-4] > historical_data['stoch_rsi_d'].iloc[-4])
                         ) and
-                        historical_data['stoch_rsi_k'].iloc[-2] > 0.7 and
-                        historical_data['short_ema'].iloc[-2] < historical_data['short_ema'].iloc[-3]
+                        historical_data['stoch_rsi_k'].iloc[-2] > 0.7 and short_ema_values.iloc[-2] < short_ema_values.iloc[-3]
                     )
-                    and short_ema_values.iloc[-2] < short_ema_values.iloc[-3]
-                    and historical_data['medium_ema'].iloc[-2] < historical_data['long_ema'].iloc[-2]
                 ):
                     print(f'{symbol} Short Entry Signal')
                     # Close existing long position if any
