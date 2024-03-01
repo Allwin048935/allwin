@@ -157,10 +157,10 @@ def ema_strategy():
                 long_ema_values = historical_data['long_ema']
 
                 # Print EMA values
-                print(f'{symbol} EMA Values:')
-                print('Short EMA 2:', short_ema_values.iloc[-2])
-                print('Short EMA 3:', short_ema_values.iloc[-3])
-                print('Long EMA:', long_ema_values.iloc[-1])
+                #print(f'{symbol} EMA Values:')
+                #print('Short EMA 2:', short_ema_values.iloc[-2])
+                #print('Short EMA 3:', short_ema_values.iloc[-3])
+                #print('Long EMA:', long_ema_values.iloc[-1])
 
                 # Fetch the latest candlestick for each symbol
                 latest_candle = exchange.fetch_ticker(symbol)
@@ -192,8 +192,6 @@ def ema_strategy():
                         historical_data['stoch_rsi_k'].iloc[-2] < 0.3 and
                         historical_data['short_ema'].iloc[-2] > historical_data['short_ema'].iloc[-3]
                     )
-                    and historical_data['short_ema'].iloc[-2] > historical_data['medium_ema'].iloc[-2]
-                    and historical_data['medium_ema'].iloc[-2] > historical_data['long_ema'].iloc[-2]
                 ):
                     print(f'{symbol} Long Entry Signal')
                     # Close existing short position if any
@@ -227,8 +225,6 @@ def ema_strategy():
                         historical_data['stoch_rsi_k'].iloc[-2] > 0.7 and
                         historical_data['short_ema'].iloc[-2] < historical_data['short_ema'].iloc[-3]
                     )
-                    and historical_data['short_ema'].iloc[-2] < historical_data['medium_ema'].iloc[-2]
-                    and historical_data['medium_ema'].iloc[-2] < historical_data['long_ema'].iloc[-2]
                 ):
                     print(f'{symbol} Short Entry Signal')
                     # Close existing long position if any
