@@ -75,6 +75,12 @@ def fetch_ohlcv(symbol, timeframe, limit):
     df['medium_ema'] = calculate_ema(df, medium_ema_period)
     df['long_ema'] = calculate_ema(df, long_ema_period)
 
+    # Print EMA values
+    # print(f'{symbol} EMA Values:')
+    print('Short EMA 2:', short_ema_values.iloc[-2])
+    print('Short EMA 3:', short_ema_values.iloc[-3])
+    # print('Long EMA:', long_ema_values.iloc[-1])
+
     # Calculate StochRSI
     stoch_rsi_indicator = ta.momentum.StochRSIIndicator(df['close'])
     df['stoch_rsi'] = stoch_rsi_indicator.stochrsi()
