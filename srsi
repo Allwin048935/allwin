@@ -185,35 +185,35 @@ def ema_strategy():
                     (historical_data['stoch_rsi_k'].iloc[-3] > historical_data['stoch_rsi_d'].iloc[-3] and
                     historical_data['stoch_rsi_k'].iloc[-4] < historical_data['stoch_rsi_d'].iloc[-4]))
 
-                ma long = short_ema_values.iloc[-2] > short_ema_values.iloc[-3]
+                ma_long = short_ema_values.iloc[-2] > short_ema_values.iloc[-3]
 
-                srsi long threshold = historical_data['stoch_rsi_k'].iloc[-2] < 0.3
+                srsi_long_threshold = historical_data['stoch_rsi_k'].iloc[-2] < 0.3
 
-                BUY Signal = srsi long and ma long and srsi long threshold
+                BUY_Signal = srsi_long and ma_long and srsi_long_threshold
 
-                srsi short = ((historical_data['stoch_rsi_k'].iloc[-2] < historical_data['stoch_rsi_d'].iloc[-2] and
+                srsi_short = ((historical_data['stoch_rsi_k'].iloc[-2] < historical_data['stoch_rsi_d'].iloc[-2] and
                             historical_data['stoch_rsi_k'].iloc[-3] > historical_data['stoch_rsi_d'].iloc[-3]) or
                             (historical_data['stoch_rsi_k'].iloc[-3] < historical_data['stoch_rsi_d'].iloc[-3] and
                             historical_data['stoch_rsi_k'].iloc[-4] > historical_data['stoch_rsi_d'].iloc[-4]))
 
-                ma short = short_ema_values.iloc[-2] < short_ema_values.iloc[-3]
+                ma_short = short_ema_values.iloc[-2] < short_ema_values.iloc[-3]
 
-                srsi short threshold = historical_data['stoch_rsi_k'].iloc[-2] > 0.7
+                srsi_short_threshold = historical_data['stoch_rsi_k'].iloc[-2] > 0.7
 
-                SELL Signal = srsi short and ma short and srsi short threshold
+                SELL_Signal = srsi_short and ma_short and srsi_short_threshold
 
-                srsi long close = historical_data['stoch_rsi_k'].iloc[-2] < historical_data['stoch_rsi_k'].iloc[-3]
-                ma long close = short_ema_values.iloc[-2] < short_ema_values.iloc[-3]
-                Long Close = srsi long close or ma long close
+                srsi_long_close = historical_data['stoch_rsi_k'].iloc[-2] < historical_data['stoch_rsi_k'].iloc[-3]
+                ma_long_close = short_ema_values.iloc[-2] < short_ema_values.iloc[-3]
+                Long_Close = srsi_long_close or ma_long_close
 
-                srsi short close = historical_data['stoch_rsi_k'].iloc[-2] > historical_data['stoch_rsi_k'].iloc[-3]
-                ma short close = short_ema_values.iloc[-2] > short_ema_values.iloc[-3]
-                Short Close = srsi short close or ma short close
+                srsi_short_close = historical_data['stoch_rsi_k'].iloc[-2] > historical_data['stoch_rsi_k'].iloc[-3]
+                ma_short_close = short_ema_values.iloc[-2] > short_ema_values.iloc[-3]
+                Short_Close = srsi_short_close or ma_short_close
 
                 # Make trading decisions for each symbol
                 if (
                     last_order_types[symbol] != 'LONG' and
-                    BUY Signal
+                    BUY_Signal
                 ):
                     print(f'{symbol} Long Entry Signal')
                     # Close existing short position if any
@@ -226,7 +226,7 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] == 'LONG' and
-                    Long Close
+                    Long_Close
                 ):
                     print(f'{symbol} Long Exit Signal')
                     # Close existing long position if short EMA crosses below long EMA
@@ -234,7 +234,7 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] != 'SHORT' and
-                    SELL Signal
+                    SELL_Signal
                 ):
                     print(f'{symbol} Short Entry Signal')
                     # Close existing long position if any
@@ -247,7 +247,7 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] == 'LONG' and
-                    Short Close
+                    Short_Close
                 ):
                     print(f'{symbol} Short Exit Signal')
                     # Close existing short position if short EMA crosses above long EMA
