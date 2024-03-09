@@ -180,10 +180,10 @@ def ema_strategy():
                 quantity = fixed_quantity_usdt / float(latest_close)
                 
                 # save the side
-                srsi long = ((historical_data['stoch_rsi_k'].iloc[-2] > historical_data['stoch_rsi_d'].iloc[-2] and
-                            historical_data['stoch_rsi_k'].iloc[-3] < historical_data['stoch_rsi_d'].iloc[-3]) or
-                            (historical_data['stoch_rsi_k'].iloc[-3] > historical_data['stoch_rsi_d'].iloc[-3] and
-                            historical_data['stoch_rsi_k'].iloc[-4] < historical_data['stoch_rsi_d'].iloc[-4]))
+                srsi_long = ((historical_data['stoch_rsi_k'].iloc[-2] > historical_data['stoch_rsi_d'].iloc[-2] and
+                    historical_data['stoch_rsi_k'].iloc[-3] < historical_data['stoch_rsi_d'].iloc[-3]) or
+                    (historical_data['stoch_rsi_k'].iloc[-3] > historical_data['stoch_rsi_d'].iloc[-3] and
+                    historical_data['stoch_rsi_k'].iloc[-4] < historical_data['stoch_rsi_d'].iloc[-4]))
 
                 ma long = short_ema_values.iloc[-2] > short_ema_values.iloc[-3]
 
