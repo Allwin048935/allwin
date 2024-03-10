@@ -204,11 +204,11 @@ def ema_strategy():
 
                 srsi_long_close = historical_data['stoch_rsi_k'].iloc[-2] < historical_data['stoch_rsi_k'].iloc[-3]
                 ma_long_close = short_ema_values.iloc[-2] < short_ema_values.iloc[-3]
-                Long_Close = srsi_long_close or ma_long_close
+                Long_Close = srsi_long_close and ma_long_close
 
                 srsi_short_close = historical_data['stoch_rsi_k'].iloc[-2] > historical_data['stoch_rsi_k'].iloc[-3]
                 ma_short_close = short_ema_values.iloc[-2] > short_ema_values.iloc[-3]
-                Short_Close = srsi_short_close or ma_short_close
+                Short_Close = srsi_short_close and ma_short_close
 
                 # Make trading decisions for each symbol
                 # Check conditions and execute trades
