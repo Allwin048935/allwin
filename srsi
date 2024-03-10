@@ -232,13 +232,14 @@ def ema_strategy():
                         last_order_types[symbol] = 'LONG'
 
                 elif (
-                    last_order_types[symbol] == 'LONG' and
+                    open_positions[symbol] == 'LONG' and
                     Long_Close
                 ):
                     # Long Exit Signal
                     print(f'{symbol} Long Exit Signal')
                     # Close existing long position
                     close_long_position(symbol, quantity)
+                    open_positions[symbol] = None
 
                 elif (
                     last_order_types[symbol] != 'SHORT' and
@@ -260,13 +261,14 @@ def ema_strategy():
                         last_order_types[symbol] = 'SHORT'
 
                 elif (
-                    last_order_types[symbol] == 'SHORT' and
+                    open_positions[symbol] == 'SHORT' and
                     Short_Close
                 ):
                     # Short Exit Signal
                     print(f'{symbol} Short Exit Signal')
                     # Close existing short position
                     close_short_position(symbol, quantity)
+                    open_positions[symbol] = None
 
             # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(60)
