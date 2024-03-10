@@ -211,46 +211,61 @@ def ema_strategy():
                 Short_Close = srsi_short_close or ma_short_close
 
                 # Make trading decisions for each symbol
+                # Check conditions and execute trades
                 if (
                     last_order_types[symbol] != 'LONG' and
                     BUY_Signal
                 ):
-                    print(f'{symbol} Long Entry Signal')
-                    # Close existing short position if any
-                    if open_positions[symbol] == 'SHORT':
-                        close_short_position(symbol, quantity)
-                    # Place a market buy order to enter long position
-                    place_market_buy_order(symbol, quantity)
-                    open_positions[symbol] = 'LONG'
-                    last_order_types[symbol] = 'LONG'
+                    # Long Entry Signal
+                    if (
+                        srsi_long and
+                        ma_long and
+                        srsi_long_threshold
+                    ):
+                        print(f'{symbol} Long Entry Signal')
+                        # Close existing short position if any
+                        if open_positions[symbol] == 'SHORT':
+                            close_short_position(symbol, quantity)
+                        # Place a market buy order to enter long position
+                        place_market_buy_order(symbol, quantity)
+                        open_positions[symbol] = 'LONG'
+                        last_order_types[symbol] = 'LONG'
 
                 elif (
                     last_order_types[symbol] == 'LONG' and
                     Long_Close
                 ):
+                    # Long Exit Signal
                     print(f'{symbol} Long Exit Signal')
-                    # Close existing long position if short EMA crosses below long EMA
+                    # Close existing long position
                     close_long_position(symbol, quantity)
 
                 elif (
                     last_order_types[symbol] != 'SHORT' and
                     SELL_Signal
                 ):
-                    print(f'{symbol} Short Entry Signal')
-                    # Close existing long position if any
-                    if open_positions[symbol] == 'LONG':
-                        close_long_position(symbol, quantity)
-                    # Place a market sell order to enter short position
-                    place_market_sell_order(symbol, quantity)
-                    open_positions[symbol] = 'SHORT'
-                    last_order_types[symbol] = 'SHORT'
+                    # Short Entry Signal
+                    if (
+                        srsi_short and
+                        ma_short and
+                        srsi_short_threshold
+                    ):
+                        print(f'{symbol} Short Entry Signal')
+                        # Close existing long position if any
+                        if open_positions[symbol] == 'LONG':
+                            close_long_position(symbol, quantity)
+                        # Place a market sell order to enter short position
+                        place_market_sell_order(symbol, quantity)
+                        open_positions[symbol] = 'SHORT'
+                        last_order_types[symbol] = 'SHORT'
 
                 elif (
-                    last_order_types[symbol] == 'LONG' and
+                    last_order_types[symbol] == 'SHORT' and
                     Short_Close
                 ):
+                    # Short Exit Signal
                     print(f'{symbol} Short Exit Signal')
-                    # Close existing short position if short EMA crosses above long EMA
+                    # Close existing short position
                     close_short_position(symbol, quantity)
 
             # Sleep for some time (e.g., 5 minutes) before checking again
