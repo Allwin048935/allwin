@@ -6,8 +6,8 @@ import hmac
 import urllib.parse
 
 # Binance API keys
-api_key = 'cOmCONWJRpxWr9XGwwJoKPLQSWeWIwMjoobgqXKG6cqO6GmtIaXdsMEjsHXJcNQU'
-api_secret = 'AC4x9ihiOezuEtqz0lRcO5QOHgGQUwFZ3TOyJw38SXmsePIM1KmNWeVYw0H4nXO2'
+api_key = 'veiqd07BuRmMlxy3eeRLLKNyDnFrIphTcqgSM7XTRUCzQWTyqxK4sPtfVZioaVHi'
+api_secret = 'N4myBDNkkD203gxxpo8NLQgdZxdvzm7N7PpBjBU0DiTtctTLaFQEVev51N4P5R5g'
 
 # Telegram bot token and chat ID
 telegram_bot_token = '6811110812:AAFNJp5kcSh0KZ71Yizf8Y3rPBarz-ywopM'
