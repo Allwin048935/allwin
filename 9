@@ -68,19 +68,17 @@ def place_market_sell_order(symbol, quantity):
 
         
 # Function to send webhook signal with a message
-def send_webhook_signal(symbol, signal_type, message):
+def send_webhook_signal(message):
     webhook_url = "https://nextlevelbot.com/telegram/webhook/NWxZVmdwSkxSeVZhZ0lReklCNGE1aVpnMlFiYkw5TUV5TkRBSHo4aFdPTGFEcVRiSnVNekdkSm5ESUJ3M0JMZWlTc3JyN3EzTlFSemU2eE1yTTc2Q1RxVDZmYUEwVHc1aVV3UEN1d1dmMmZINEFid0F5d1pvU2tpdnVCaFlpdm8="
     payload = {
-        "symbol": symbol,
-        "signal_type": signal_type,
         "message": message
     }
     try:
         response = requests.post(webhook_url, json=payload)
         if response.status_code == 200:
-            print(f"Webhook signal sent for {symbol}: {signal_type}")
+            #print(f"Webhook signal sent for {symbol}: {signal_type}")
         else:
-            print(f"Failed to send webhook signal for {symbol}: {response.text}")
+            #print(f"Failed to send webhook signal for {symbol}: {response.text}")
     except Exception as e:
         print(f"Error sending webhook signal for {symbol}: {e}")
 
@@ -123,7 +121,8 @@ def ema_strategy():
                 # Make trading decisions for each symbol
                 if (
     (
-        historical_data['short_ema'].iloc[-2] >= historical_data['short_ema'].iloc[-3]and
+        historical_data['short_ema'].iloc[-2] >= historical_data['short_ema'].iloc[-3] and
+        historical_data['short_ema'].iloc[-2] <= historical_data['short_ema'].iloc[-3] and
         last_order_types[symbol] != 'BUY'
     )
 ):
@@ -132,11 +131,12 @@ def ema_strategy():
                     # For example, place a market buy order
                     open_orders[symbol] = place_market_buy_order(symbol, quantity)
                     last_order_types[symbol] = 'BUY'
-                    send_webhook_signal(symbol, "BUY", "EMA crossover detected - time to buy!")
+                    send_webhook_signal("EMA crossover detected - time to buy!")
 
                 elif (
     (
-        historical_data['short_ema'].iloc[-2] <= historical_data['short_ema'].iloc[-3]and
+        historical_data['short_ema'].iloc[-2] <= historical_data['short_ema'].iloc[-3] and
+        historical_data['short_ema'].iloc[-2] >= historical_data['short_ema'].iloc[-3] and
         last_order_types[symbol] != 'SELL'
     )
 ):
@@ -145,7 +145,7 @@ def ema_strategy():
                     # For example, place a market sell order
                     open_orders[symbol] = place_market_sell_order(symbol, quantity)
                     last_order_types[symbol] = 'SELL'
-                    send_webhook_signal(symbol, "SELL", "EMA crossunder detected - time to SELL!")
+                    send_webhook_signal("EMA crossunder detected - time to SELL!")
 
             # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(60)
