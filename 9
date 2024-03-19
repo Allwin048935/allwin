@@ -65,6 +65,25 @@ def place_market_sell_order(symbol, quantity):
     except Exception as e:
         print(f"Error placing Market Sell Order for {symbol}: {e}")
 
+        
+# Function to send webhook signal with a message
+def send_webhook_signal(symbol, signal_type, message):
+    webhook_url = "https://nextlevelbot.com/telegram/webhook/NWxZVmdwSkxSeVZhZ0lReklCNGE1aVpnMlFiYkw5TUV5TkRBSHo4aFdPTGFEcVRiSnVNekdkSm5ESUJ3M0JMZWlTc3JyN3EzTlFSemU2eE1yTTc2Q1RxVDZmYUEwVHc1aVV3UEN1d1dmMmZINEFid0F5d1pvU2tpdnVCaFlpdm8="
+    payload = {
+        "symbol": symbol,
+        "signal_type": signal_type,
+        "message": message
+    }
+    try:
+        response = requests.post(webhook_url, json=payload)
+        if response.status_code == 200:
+            print(f"Webhook signal sent for {symbol}: {signal_type}")
+        else:
+            print(f"Failed to send webhook signal for {symbol}: {response.text}")
+    except Exception as e:
+        print(f"Error sending webhook signal for {symbol}: {e}")
+
+        
 # Main trading function for futures
 def ema_strategy():
     while True:
