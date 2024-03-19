@@ -44,7 +44,7 @@ def calculate_ema(df, period, column='close'):
 
 # Function to send webhook signal with a message
 def send_webhook_signal(symbol, signal_type, message):
-    webhook_url = "https://nextlevelbot.com/telegram/webhook/eGFjTVBZNzVXdXVVUFhCSHVJcWVnbS9iYVJGYVErQmZtVTZhUnRMOGJHWE9CSGlSMDQvc1hZcjErMFB5d0o4ek5UV2J3REY2N05uRlJSR08xejlzcmNYK01hbXdSVFUwQ21JTk43WWNpUm9FVCtSdWRnZlVwRG5na2V6T0F6UzU="
+    webhook_url = "https://nextlevelbot.com/telegram/webhook/NWxZVmdwSkxSeVZhZ0lReklCNGE1aVpnMlFiYkw5TUV5TkRBSHo4aFdPTGFEcVRiSnVNekdkSm5ESUJ3M0JMZWlTc3JyN3EzTlFSemU2eE1yTTc2Q1RxVDZmYUEwVHc1aVV3UEN1d1dmMmZINEFid0F5d1pvU2tpdnVCaFlpdm8="
     payload = {
         "symbol": symbol,
         "signal_type": signal_type,
