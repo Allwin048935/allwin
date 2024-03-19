@@ -76,11 +76,11 @@ def send_webhook_signal(message):
     try:
         response = requests.post(webhook_url, json=payload)
         if response.status_code == 200:
-            print(f"Webhook signal sent for {symbol}")
+            print("Webhook signal sent")
         else:
-            print(f"Failed to send webhook signal for {symbol}: {response.text}")
+            print(f"Failed to send webhook signal: {response.text}")
     except Exception as e:
-        print(f"Error sending webhook signal for {symbol}: {e}")
+        print(f"Error sending webhook signal: {e}")
 
         
 # Main trading function for futures
@@ -130,7 +130,7 @@ def ema_strategy():
                     # For example, place a market buy order
                     open_orders[symbol] = place_market_buy_order(symbol, quantity)
                     last_order_types[symbol] = 'BUY'
-                    send_webhook_signal("EMA crossover detected - time to buy!")
+                    send_webhook_signal(f"EMA crossover detected for {symbol} - time to buy!")
 
                 elif (
     (
@@ -143,7 +143,7 @@ def ema_strategy():
                     # For example, place a market sell order
                     open_orders[symbol] = place_market_sell_order(symbol, quantity)
                     last_order_types[symbol] = 'SELL'
-                    send_webhook_signal("EMA crossunder detected - time to SELL!")
+                    send_webhook_signal(f"EMA crossover detected for {symbol} - time to sell!")
 
             # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(300)
