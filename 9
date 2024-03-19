@@ -131,6 +131,7 @@ def ema_strategy():
                     # For example, place a market buy order
                     open_orders[symbol] = place_market_buy_order(symbol, quantity)
                     last_order_types[symbol] = 'BUY'
+                    send_webhook_signal(symbol, "BUY", "EMA crossover detected - time to buy!")
 
                 elif (
     (
@@ -143,6 +144,7 @@ def ema_strategy():
                     # For example, place a market sell order
                     open_orders[symbol] = place_market_sell_order(symbol, quantity)
                     last_order_types[symbol] = 'SELL'
+                    send_webhook_signal(symbol, "SELL", "EMA crossunder detected - time to SELL!")
 
             # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(60)
