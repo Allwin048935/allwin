@@ -71,7 +71,7 @@ def place_market_sell_order(symbol, quantity):
 def send_webhook_signal(message):
     webhook_url = "https://nextlevelbot.com/telegram/webhook/NWxZVmdwSkxSeVZhZ0lReklCNGE1aVpnMlFiYkw5TUV5TkRBSHo4aFdPTGFEcVRiSnVNekdkSm5ESUJ3M0JMZWlTc3JyN3EzTlFSemU2eE1yTTc2Q1RxVDZmYUEwVHc1aVV3UEN1d1dmMmZINEFid0F5d1pvU2tpdnVCaFlpdm8="
     payload = {
-        "message": message
+        message
     }
     try:
         response = requests.post(webhook_url, json=payload)
