@@ -76,9 +76,9 @@ def send_webhook_signal(message):
     try:
         response = requests.post(webhook_url, json=payload)
         if response.status_code == 200:
-            #print(f"Webhook signal sent for {symbol}: {signal_type}")
+            print(f"Webhook signal sent for {symbol}")
         else:
-            #print(f"Failed to send webhook signal for {symbol}: {response.text}")
+            print(f"Failed to send webhook signal for {symbol}: {response.text}")
     except Exception as e:
         print(f"Error sending webhook signal for {symbol}: {e}")
 
