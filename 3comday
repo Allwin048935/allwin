@@ -114,24 +114,21 @@ def ema_strategy():
                     short_ema_15min.iloc[-3] <= latest_open and
                     last_order_types[symbol] != 'BUY'
                 ):
-                    print(f'{symbol} Buy Signal (Short EMA cross over Open)')
-                    send_webhook_signal(symbol, "BUY", f"Short EMA cross over Open: {short_ema_15min.iloc[-2]} >= {latest_open}")
-                    # Implement your buy logic here for futures
-                    # For example, place a market buy order
                     open_orders[symbol] = place_market_buy_order(symbol, quantity)
                     last_order_types[symbol] = 'BUY'
+                    print(f'{symbol} Buy Signal (Short EMA cross over Open)')
+                    send_webhook_signal(symbol, "BUY", f"Short EMA cross over Open: {short_ema_15min.iloc[-2]} >= {latest_open}")
+             
 
                 elif (
                     short_ema_15min.iloc[-2] <= latest_open and
                     short_ema_15min.iloc[-3] >= latest_open and
                     last_order_types[symbol] != 'SELL'
                 ):
-                    print(f'{symbol} Sell Signal (Short EMA cross under Open)')
-                    send_webhook_signal(symbol, "SELL", f"Short EMA cross under Open: {short_ema_15min.iloc[-2]} <= {latest_open}")
-                    # Implement your sell logic here for futures
-                    # For example, place a market sell order
                     open_orders[symbol] = place_market_sell_order(symbol, quantity)
                     last_order_types[symbol] = 'SELL'
+                    print(f'{symbol} Sell Signal (Short EMA cross under Open)')
+                    send_webhook_signal(symbol, "SELL", f"Short EMA cross under Open: {short_ema_15min.iloc[-2]} <= {latest_open}")
 
                 # Update last order type regardless of whether an order is placed or not
                 if open_orders[symbol] is None:
