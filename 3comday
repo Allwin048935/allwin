@@ -27,7 +27,6 @@ fixed_quantity_usdt = 15
 
 # Define webhook URL
 webhook_url = "https://nextlevelbot.com/telegram/webhook/NWxZVmdwSkxSeVZhZ0lReklCNGE1aVpnMlFiYkw5TUV5TkRBSHo4aFdPTGFEcVRiSnVNekdkSm5ESUJ3M0JMZWlTc3JyN3EzTlFSemU2eE1yTTc2Q1RxVDZmYUEwVHc1aVV3UEN1d1dmMmZINEFid0F5d1pvU2tpdnVCaFlpdm8="
-   
 
 # Function to fetch historical data for futures with EMA calculation
 def fetch_ohlcv(symbol, timeframe, limit):
@@ -71,20 +70,18 @@ def place_market_sell_order(symbol, quantity):
         print(f"Error placing Market Sell Order for {symbol}: {e}")
 
 # Function to send webhook signal
-def send_webhook_signal(symbol, signal_type, message):
+def send_webhook_signal(message):
     payload = {
-        "symbol": symbol,
-        "signal_type": signal_type,
-        "message": message
+        message
     }
     try:
         response = requests.post(webhook_url, json=payload)
         if response.status_code == 200:
-            print(f"Webhook signal sent for {symbol}: {signal_type}")
+            print("Webhook signal sent successfully.")
         else:
-            print(f"Failed to send webhook signal for {symbol}: {response.text}")
+            print(f"Failed to send webhook signal: {response.text}")
     except Exception as e:
-        print(f"Error sending webhook signal for {symbol}: {e}")
+        print(f"Error sending webhook signal: {e}")
 
 def ema_strategy():
     while True:
@@ -117,8 +114,7 @@ def ema_strategy():
                     open_orders[symbol] = place_market_buy_order(symbol, quantity)
                     last_order_types[symbol] = 'BUY'
                     print(f'{symbol} Buy Signal (Short EMA cross over Open)')
-                    send_webhook_signal(symbol, "BUY", f"Short EMA cross over Open: {short_ema_15min.iloc[-2]} >= {latest_open}")
-             
+                    send_webhook_signal(f"Short EMA cross over Open: {short_ema_15min.iloc[-2]} >= {latest_open}")
 
                 elif (
                     short_ema_15min.iloc[-2] <= latest_open and
@@ -128,11 +124,7 @@ def ema_strategy():
                     open_orders[symbol] = place_market_sell_order(symbol, quantity)
                     last_order_types[symbol] = 'SELL'
                     print(f'{symbol} Sell Signal (Short EMA cross under Open)')
-                    send_webhook_signal(symbol, "SELL", f"Short EMA cross under Open: {short_ema_15min.iloc[-2]} <= {latest_open}")
-
-                # Update last order type regardless of whether an order is placed or not
-                #if open_orders[symbol] is None:
-                    #last_order_types[symbol] = None
+                    send_webhook_signal(f"Short EMA cross under Open: {short_ema_15min.iloc[-2]} <= {latest_open}")
 
             # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(60)
