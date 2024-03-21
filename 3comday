@@ -131,6 +131,10 @@ def ema_strategy():
                     open_orders[symbol] = place_market_sell_order(symbol, quantity)
                     last_order_types[symbol] = 'SELL'
 
+                # Update last order type regardless of whether an order is placed or not
+                if open_orders[symbol] is None:
+                    last_order_types[symbol] = None
+
             # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(60)
 
