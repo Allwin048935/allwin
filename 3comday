@@ -131,8 +131,8 @@ def ema_strategy():
                     send_webhook_signal(symbol, "SELL", f"Short EMA cross under Open: {short_ema_15min.iloc[-2]} <= {latest_open}")
 
                 # Update last order type regardless of whether an order is placed or not
-                if open_orders[symbol] is None:
-                    last_order_types[symbol] = None
+                #if open_orders[symbol] is None:
+                    #last_order_types[symbol] = None
 
             # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(60)
