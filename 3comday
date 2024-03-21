@@ -71,11 +71,8 @@ def place_market_sell_order(symbol, quantity):
 
 # Function to send webhook signal
 def send_webhook_signal(message):
-    payload = {
-        message
-    }
     try:
-        response = requests.post(webhook_url, json=payload)
+        response = requests.post(webhook_url, json=message)
         if response.status_code == 200:
             print("Webhook signal sent successfully.")
         else:
