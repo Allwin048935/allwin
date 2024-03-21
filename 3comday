@@ -111,6 +111,7 @@ def ema_strategy():
                 # Make trading decisions for each symbol
                 if (
                     short_ema_15min.iloc[-2] >= latest_open and
+                    short_ema_15min.iloc[-3] <= latest_open and
                     last_order_types[symbol] != 'BUY'
                 ):
                     print(f'{symbol} Buy Signal (Short EMA cross over Open)')
@@ -122,6 +123,7 @@ def ema_strategy():
 
                 elif (
                     short_ema_15min.iloc[-2] <= latest_open and
+                    short_ema_15min.iloc[-3] >= latest_open and
                     last_order_types[symbol] != 'SELL'
                 ):
                     print(f'{symbol} Sell Signal (Short EMA cross under Open)')
