@@ -1,0 +1,174 @@
+import ccxt
+import pandas as pd
+import time
+import requests
+
+# Define Binance API credentials
+BINANCE_API_KEY = 'your_binance_api_key'
+BINANCE_API_SECRET = 'your_binance_api_secret'
+
+# Define symbols to trade
+symbols = ['BTC/USDT', 'ETH/USDT']  # Example symbols
+
+# Create a Binance Futures client
+exchange = ccxt.binance({
+    'apiKey': BINANCE_API_KEY,
+    'secret': BINANCE_API_SECRET,
+    'enableRateLimit': True,
+    'options': {
+        'defaultType': 'future',  # Set the default type to futures
+    }
+})
+
+# Define EMA strategy parameters
+short_ema_period = 1
+long_ema_period = 50
+
+# Track the last order type placed for each symbol
+last_order_types = {symbol: None for symbol in symbols}
+
+# Initial funds for simulation
+initial_funds = 2000
+
+# Cumulative profit/loss
+cumulative_profit_loss = 0
+
+# Define webhook URL
+webhook_url = "https://nextlevelbot.com/telegram/webhook/NWxZVmdwSkxSeVZhZ0lReklCNGE1aVpnMlFiYkw5TUV5TkRBSHo4aFdPTGFEcVRiSnVNekdkSm5ESUJ3M0JMZWlTc3JyN3EzTlFSemU2eE1yTTc2Q1RxVDZmYUEwVHc1aVV3UEN1d1dmMmZINEFid0F5d1pvU2tpdnVCaFlpdm8="
+
+# Function to fetch historical data for futures with EMA calculation
+def fetch_ohlcv(symbol, timeframe, limit):
+    ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
+    df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+
+    # Calculate short and long EMAs
+    df['short_ema'] = calculate_ema(df, short_ema_period)
+    df['long_ema'] = calculate_ema(df, long_ema_period)
+
+    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+    df.set_index('timestamp', inplace=True)
+    return df
+
+# Function to calculate EMA
+def calculate_ema(df, period, column='close'):
+    return df[column].ewm(span=period, adjust=False).mean()
+
+# Function to send webhook signal
+def send_webhook_signal(message):
+    try:
+        response = requests.post(webhook_url, json=message)
+        if response.status_code == 200:
+            print("Webhook signal sent successfully.")
+        else:
+            print(f"Failed to send webhook signal: {response.text}")
+    except Exception as e:
+        print(f"Error sending webhook signal: {e}")
+
+# Function to simulate long entry
+def simulate_long_entry(symbol, quantity, price):
+    global initial_funds
+    global cumulative_profit_loss
+    initial_funds -= quantity * price
+    entry_price = price
+    return entry_price  # Return entry price
+
+# Function to simulate short entry
+def simulate_short_entry(symbol, quantity, price):
+    global initial_funds
+    global cumulative_profit_loss
+    initial_funds += quantity * price
+    entry_price = price
+    return entry_price  # Return entry price
+
+# Function to simulate exit from long position
+def simulate_long_exit(symbol, quantity, price, entry_price):
+    global initial_funds
+    global cumulative_profit_loss
+    revenue = quantity * price
+    profit_loss = revenue - (quantity * entry_price)
+    initial_funds += profit_loss
+    cumulative_profit_loss += profit_loss
+    message = {
+        "symbol": symbol,
+        "quantity": quantity,
+        "revenue": revenue,
+        "entry_price": entry_price,
+        "exit_price": price,
+        "profit_loss": profit_loss,
+        "cumulative_profit_loss": cumulative_profit_loss
+    }
+    send_webhook_signal(message)
+    print(f"Simulated Long Exit for {symbol}: Quantity={quantity}, Revenue={revenue}, Profit/Loss={profit_loss}, Remaining Funds={initial_funds}")
+
+# Function to simulate exit from short position
+def simulate_short_exit(symbol, quantity, price, entry_price):
+    global initial_funds
+    global cumulative_profit_loss
+    cost = quantity * price
+    profit_loss = (quantity * entry_price) - cost
+    initial_funds += profit_loss
+    cumulative_profit_loss += profit_loss
+    message = {
+        "symbol": symbol,
+        "quantity": quantity,
+        "cost": cost,
+        "entry_price": entry_price,
+        "exit_price": price,
+        "profit_loss": profit_loss,
+        "cumulative_profit_loss": cumulative_profit_loss
+    }
+    send_webhook_signal(message)
+    print(f"Simulated Short Exit for {symbol}: Quantity={quantity}, Cost={cost}, Profit/Loss={profit_loss}, Remaining Funds={initial_funds}")
+
+# Function to simulate EMA strategy
+def ema_strategy():
+    global initial_funds
+    while True:
+        try:
+            for symbol in symbols:
+                # Fetch historical data for each symbol with a 15-minute time interval
+                historical_data = fetch_ohlcv(symbol, '15m', 200)
+
+                # Check if there's enough data for EMA calculation
+                if len(historical_data) < long_ema_period:
+                    print(f"Not enough data for {symbol}. Waiting for more data...")
+                    continue
+
+                # Fetch the latest candlestick for each symbol
+                latest_candle = exchange.fetch_ohlcv(symbol, '1d', limit=1)
+                latest_open = latest_candle[0][1]  # Open price of the latest candle
+
+                # Calculate the quantity based on the initial funds and the latest open price
+                quantity = initial_funds / float(latest_open)
+
+                # Calculate short EMA over a 15-minute interval
+                short_ema_15min = calculate_ema(historical_data, short_ema_period, column='close')
+
+                # Make trading decisions for each symbol
+                if (
+                    short_ema_15min.iloc[-2] >= latest_open and
+                    short_ema_15min.iloc[-3] <= latest_open and
+                    last_order_types[symbol] != 'LONG'
+                ):
+                    entry_price = simulate_long_entry(symbol, quantity, latest_open)
+                    last_order_types[symbol] = 'LONG'
+                    print(f'{symbol} Long Entry Signal (Short EMA cross over Open)')
+
+                elif (
+                    short_ema_15min.iloc[-2] <= latest_open and
+                    short_ema_15min.iloc[-3] >= latest_open and
+                    last_order_types[symbol] != 'SHORT'
+                ):
+                    entry_price = simulate_short_entry(symbol, quantity, latest_open)
+                    last_order_types[symbol] = 'SHORT'
+                    print(f'{symbol} Short Entry Signal (Short EMA cross under Open)')
+
+            # Sleep for some time (e.g., 5 minutes) before checking again
+            time.sleep(300)
+
+        except Exception as e:
+            print(f'An error occurred: {e}')
+            time.sleep(60)  # Wait for a minute before trying again
+
+# Run the trading strategy
+ema_strategy()
