@@ -80,10 +80,10 @@ def send_webhook_signal(message):
 def calculate_one_day_change(symbol):
     try:
         # Fetch daily OHLCV data for the symbol
-        daily_data = fetch_ohlcv(symbol, '1d', 2)
-        if len(daily_data) >= 2:
+        daily_data = fetch_ohlcv(symbol, '1d', 3)
+        if len(daily_data) >= 3:
             # Calculate one day percentage change
-            change = ((daily_data.iloc[-1]['close'] - daily_data.iloc[-2]['close']) / daily_data.iloc[-2]['close']) * 100
+            change = ((daily_data.iloc[-2]['close'] - daily_data.iloc[-3]['close']) / daily_data.iloc[-3]['close']) * 100
             return change
     except Exception as e:
         print(f"Error calculating one day change for {symbol}: {e}")
