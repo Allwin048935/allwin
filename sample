@@ -93,14 +93,16 @@ def ema_strategy():
     while True:
         try:
             cumulated_change = 0  # Initialize cumulated change
+            symbol_changes = {}  # Initialize dictionary to store individual symbol changes
             for symbol in symbols:
                 # Calculate one day percentage change for each symbol
                 one_day_change = calculate_one_day_change(symbol)
                 if one_day_change is not None:
                     cumulated_change += one_day_change
+                    symbol_changes[symbol] = one_day_change
 
-            # Send webhook signal with the cumulated percentage change
-            send_webhook_signal({"cumulated_change": cumulated_change})
+            # Send webhook signal with the cumulated percentage change and individual symbol changes
+            send_webhook_signal({"cumulated_change": cumulated_change, "symbol_changes": symbol_changes})
 
             # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(60)
