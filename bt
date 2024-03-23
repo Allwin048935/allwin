@@ -182,6 +182,21 @@ def ema_strategy():
                     last_order_types[symbol] = 'SHORT'
                     print(f'{symbol} Short Entry Signal (Short EMA cross under Open)')
 
+                # Check for exit conditions
+                if (
+                    last_order_types[symbol] == 'LONG' and
+                    short_ema_15min.iloc[-2] <= latest_open
+                ):
+                    simulate_long_exit(symbol, quantity, latest_open, entry_price)
+                    last_order_types[symbol] = None
+
+                elif (
+                    last_order_types[symbol] == 'SHORT' and
+                    short_ema_15min.iloc[-2] >= latest_open
+                ):
+                    simulate_short_exit(symbol, quantity, latest_open, entry_price)
+                    last_order_types[symbol] = None
+
             # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(300)
 
