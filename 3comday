@@ -48,11 +48,13 @@ def calculate_ema(df, period, column='close'):
 # Function to place a market buy order
 def place_market_buy_order(symbol, quantity):
     try:
+        base_currency = symbol[:-4].upper()
+        quote_currency = symbol[-4:].upper()
+        print(f"{quote_currency}_{base_currency} Market Buy Order placed: {order}")
         order = exchange.create_market_buy_order(
             symbol=symbol,
             amount=quantity
         )
-        print(f"{symbol[3:].upper()}_USDT Market Buy Order placed: {order}")
         return order
     except Exception as e:
         print(f"Error placing Market Buy Order for {symbol}: {e}")
@@ -60,11 +62,13 @@ def place_market_buy_order(symbol, quantity):
 # Function to place a market sell order
 def place_market_sell_order(symbol, quantity):
     try:
+        base_currency = symbol[:-4].upper()
+        quote_currency = symbol[-4:].upper()
+        print(f"{quote_currency}_{base_currency} Market Sell Order placed: {order}")
         order = exchange.create_market_sell_order(
             symbol=symbol,
             amount=quantity
         )
-        print(f"{symbol[3:].upper()}_USDT Market Sell Order placed: {order}")
         return order
     except Exception as e:
         print(f"Error placing Market Sell Order for {symbol}: {e}")
@@ -79,6 +83,7 @@ def send_webhook_signal(message):
             print(f"Failed to send webhook signal: {response.text}")
     except Exception as e:
         print(f"Error sending webhook signal: {e}")
+
 
 def ema_strategy():
     while True:
