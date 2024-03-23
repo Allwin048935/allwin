@@ -34,7 +34,7 @@ def calculate_ema(df, period, column='close'):
 def calculate_one_day_change(symbol):
     try:
         # Fetch daily OHLCV data for the symbol
-        daily_data = fetch_ohlcv(symbol, '1d', 3)
+        daily_data = fetch_ohlcv(symbol, '8h', 3)
         if len(daily_data) >= 2:
             # Calculate one day percentage change
             change = ((daily_data.iloc[-2]['close'] - daily_data.iloc[-3]['close']) / daily_data.iloc[-3]['close']) * 100
