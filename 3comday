@@ -111,7 +111,13 @@ def ema_strategy():
                     open_orders[symbol] = place_market_buy_order(symbol, quantity)
                     last_order_types[symbol] = 'BUY'
                     print(f'{symbol} Buy Signal (Short EMA cross over Open)')
-                    send_webhook_signal(f"{  "message_type": "bot",  "bot_id": 13005973,  "email_token": "045951c0-66bd-47dd-a9cc-4ef2a2fee069",  "delay_seconds": 0,  "pair": "{symbol}"}")
+                    send_webhook_signal({
+                        "message_type": "bot",
+                        "bot_id": 13005973,
+                        "email_token": "045951c0-66bd-47dd-a9cc-4ef2a2fee069",
+                        "delay_seconds": 0,
+                        "pair": f"{symbol}"
+                    })
 
                 elif (
                     short_ema_15min.iloc[-2] <= latest_open and
@@ -121,7 +127,14 @@ def ema_strategy():
                     open_orders[symbol] = place_market_sell_order(symbol, quantity)
                     last_order_types[symbol] = 'SELL'
                     print(f'{symbol} Sell Signal (Short EMA cross under Open)')
-                    send_webhook_signal(f"{  "action": "close_at_market_price",  "message_type": "bot",  "bot_id": 13005973,  "email_token": "045951c0-66bd-47dd-a9cc-4ef2a2fee069",  "delay_seconds": 0,  "pair": "{symbol}"}")
+                    send_webhook_signal({
+                        "action": "close_at_market_price",
+                        "message_type": "bot",
+                        "bot_id": 13005973,
+                        "email_token": "045951c0-66bd-47dd-a9cc-4ef2a2fee069",
+                        "delay_seconds": 0,
+                        "pair": f"{symbol}"
+                    })
 
             # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(60)
