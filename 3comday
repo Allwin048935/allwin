@@ -33,17 +33,18 @@ def fetch_ohlcv(symbol, timeframe, limit):
     ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
-    # Calculate short and long EMAs
-    df['short_ema'] = calculate_ema(df, short_ema_period)
-    df['long_ema'] = calculate_ema(df, long_ema_period)
+    # Calculate short and long EMAs using HL2
+    df['short_ema'] = calculate_ema_hl2(df, short_ema_period)
+    df['long_ema'] = calculate_ema_hl2(df, long_ema_period)
 
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     df.set_index('timestamp', inplace=True)
     return df
 
-# Function to calculate EMA
-def calculate_ema(df, period, column='close'):
-    return df[column].ewm(span=period, adjust=False).mean()
+# Function to calculate EMA from HL2 instead of close
+def calculate_ema_hl2(df, period):
+    hl2 = (df['high'] + df['low']) / 2  # Calculate HL2
+    return hl2.ewm(span=period, adjust=False).mean()
 
 # Function to place a market buy order
 def place_market_buy_order(symbol, quantity):
@@ -99,8 +100,8 @@ def ema_strategy():
                 # Calculate the quantity based on the fixed USDT value
                 quantity = fixed_quantity_usdt / float(latest_open)
 
-                # Calculate short EMA over a 15-minute interval
-                short_ema_15min = calculate_ema(historical_data, short_ema_period, column='close')
+                # Calculate short EMA over a 15-minute interval using HL2
+                short_ema_15min = calculate_ema_hl2(historical_data, short_ema_period)
 
                 # Make trading decisions for each symbol
                 if (
@@ -131,4 +132,4 @@ def ema_strategy():
             time.sleep(60)  # Wait for a minute before trying again
 
 # Run the trading strategy
-ema_strategy()   
+ema_strategy()
