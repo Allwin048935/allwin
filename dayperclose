@@ -147,8 +147,7 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] == 'BUY' and
-                    close_positions[symbol] == 'BUY' and                          
-																					long_ema_15min.iloc[-2] <= (latest_open*1.01) and
+                    close_positions[symbol] == 'BUY' and																			long_ema_15min.iloc[-2] <= (latest_open*1.01) and
                     long_ema_15min.iloc[-3] >= (latest_open*1.01)
                 ):
                     print(f'{symbol} Long Exit Signal')
@@ -156,6 +155,7 @@ def ema_strategy():
                     close_long_position(symbol, quantity)
                     #open_positions[symbol] = None
                     close_positions[symbol] = 'long'
+
                 elif (
                     short_ema_15min.iloc[-2] <= latest_open and
                     last_order_types[symbol] != 'SELL'
@@ -176,8 +176,8 @@ def ema_strategy():
                     print(f'{symbol} Short Exit Signal')
                     # Close existing short position if short EMA crosses above long EMA
                     close_short_position(symbol, quantity)
-                     #open_positions[symbol] = None
-                     close_positions[symbol] = 'short'
+                    #open_positions[symbol] = None
+                    close_positions[symbol] = 'short'
 
             # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(60)
