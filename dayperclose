@@ -23,7 +23,7 @@ open_orders = {symbol: None for symbol in symbols}
 open_positions = {symbol: None for symbol in symbols}  # Initialize open_positions
 
 # Fixed quantity in USDT worth of contracts
-fixed_quantity_usdt = 15
+fixed_quantity_usdt = 6
 
 # Function to fetch historical data for futures with EMA calculation
 def fetch_ohlcv(symbol, timeframe, limit):
