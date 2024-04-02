@@ -117,10 +117,10 @@ def ema_strategy():
                     continue
 
                 # Fetch the latest candlestick for each symbol
-                latest_candle_day = exchange.fetch_ohlcv(symbol, '1d', limit=1)
-                latest_open_day = latest_candle[0][1]
-                latest_candle_min = exchange.fetch_ohlcv(symbol, '5m', limit=1)
-                latest_open_min = latest_candle[0][1]  # Open price of the latest candle
+                latest_candle = exchange.fetch_ohlcv(symbol, '1d', limit=1)
+                latest_open = latest_candle[0][1]
+                #latest_candle_min = exchange.fetch_ohlcv(symbol, '5m', limit=1)
+                #latest_open_min = latest_candle[0][1]  # Open price of the latest candle
 
                 # Calculate the quantity based on the fixed USDT value
                 quantity = fixed_quantity_usdt / float(latest_open)
@@ -129,11 +129,11 @@ def ema_strategy():
 
                 # Calculate short EMA over a 15-minute interval
                 short_ema_15min = calculate_ema(historical_data, short_ema_period, column='close')
+                long_ema_15min = calculate_ema(historical_data, long_ema_period, column='close')
 
                 # Make trading decisions for each symbol
                 if (
                     short_ema_15min.iloc[-2] >= latest_open and
-                    short_ema_15min.iloc[-3] <= latest_open and
                     last_order_types[symbol] != 'BUY'
                 ):
                     print(f'{symbol} Buy Signal (Short EMA cross over Open)')
@@ -145,18 +145,16 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] == 'BUY' and
-                    short_ema_15min.iloc[-2] <= (latest_open*1.01) and
-                    short_ema_15min.iloc[-3] >= (latest_open*1.01)
+                    long_ema_15min.iloc[-2] <= (latest_open*1.01) and
+                    long_ema_15min.iloc[-3] >= (latest_open*1.01)
                 ):
                     print(f'{symbol} Long Exit Signal')
                     # Close existing long position if short EMA crosses below long EMA
                     close_long_position(symbol, quantity)
                     open_positions[symbol] = None
-                    last_order_types[symbol] = None
 
                 elif (
                     short_ema_15min.iloc[-2] <= latest_open and
-                    short_ema_15min.iloc[-3] >= latest_open and
                     last_order_types[symbol] != 'SELL'
                 ):
                     print(f'{symbol} Sell Signal (Short EMA cross under Open)')
@@ -168,14 +166,13 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] == 'SELL' and
-                    short_ema_15min.iloc[-2] >= (latest_open*0.990) and
-                    short_ema_15min.iloc[-3] <= (latest_open*0.990)
+                    long_ema_15min.iloc[-2] >= (latest_open*0.990) and
+                    long_ema_15min.iloc[-3] <= (latest_open*0.990)
                 ):
                     print(f'{symbol} Short Exit Signal')
                     # Close existing short position if short EMA crosses above long EMA
                     close_short_position(symbol, quantity)
                     open_positions[symbol] = None
-                    last_order_types[symbol] = None
 
             # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(60)
