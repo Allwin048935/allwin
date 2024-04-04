@@ -66,7 +66,7 @@ def send_telegram_message(message):
 
 # Function to monitor balance increase
 def monitor_balance_increase(api_key, api_secret):
-    prev_fixed_balance = 100.0  # Fixed initial balance
+    prev_fixed_balance = 120.0  # Fixed initial balance
     global last_message
     while True:
         for asset, balance in get_future_balance(api_key, api_secret):
