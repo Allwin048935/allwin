@@ -148,7 +148,8 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] == 'BUY' and
-                    close_positions[symbol] == 'BUY' and																			long_ema_15min.iloc[-2] <= (latest_open*1.012) and
+                    close_positions[symbol] == 'BUY' and 
+                    long_ema_15min.iloc[-2] <= (latest_open*1.012) and
                     long_ema_15min.iloc[-3] >= (latest_open*1.012)
                 ):
                     print(f'{symbol} Long Exit Signal')
