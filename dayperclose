@@ -148,9 +148,8 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] == 'BUY' and
-                    close_positions[symbol] == 'BUY' and																			long_ema_15min.iloc[-2] <= (latest_open*1.01) and
-                    long_ema_15min.iloc[-3] >= (latest_open*1.015) and
-		    long_ema_15min.iloc[-2] <= (latest_open*1.015)
+                    close_positions[symbol] == 'BUY' and																			long_ema_15min.iloc[-2] <= (latest_open*1.012) and
+                    long_ema_15min.iloc[-3] >= (latest_open*1.012)
                 ):
                     print(f'{symbol} Long Exit Signal')
                     # Close existing long position if short EMA crosses below long EMA
@@ -174,8 +173,8 @@ def ema_strategy():
                 elif (
                     last_order_types[symbol] == 'SELL' and
 		    close_positions[symbol] == 'SELL' and
-                    long_ema_15min.iloc[-2] >= (latest_open*0.985) and
-                    long_ema_15min.iloc[-3] <= (latest_open*0.985)
+                    long_ema_15min.iloc[-2] >= (latest_open*0.988) and
+                    long_ema_15min.iloc[-3] <= (latest_open*0.988)
                 ):
                     print(f'{symbol} Short Exit Signal')
                     # Close existing short position if short EMA crosses above long EMA
@@ -184,11 +183,11 @@ def ema_strategy():
                     close_positions[symbol] = 'short'
 
             # Sleep for some time (e.g., 5 minutes) before checking again
-            time.sleep(300)
+            time.sleep(60)
 
         except Exception as e:
             print(f'An error occurred: {e}')
-            time.sleep(300)  # Wait for a minute before trying again
+            time.sleep(60)  # Wait for a minute before trying again
 
 # Run the trading strategy
 ema_strategy()
