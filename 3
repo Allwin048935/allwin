@@ -14,7 +14,7 @@ exchange = ccxt.binance({
 })
 
 # Define EMA strategy parameters
-short_ema_period = 3
+short_ema_period = 2
 long_ema_period = 50
 medium_ema_period = 25
 
@@ -109,7 +109,7 @@ def ema_strategy():
         try:
             for symbol in symbols:
                 # Fetch historical data for each symbol with a 15-minute time interval
-                historical_data = fetch_ohlcv(symbol, '5m', 100)
+                historical_data = fetch_ohlcv(symbol, '15m', 100)
 
                 if historical_data is None:
                     continue  # Skip to the next symbol if there's an error fetching data
