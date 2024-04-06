@@ -138,7 +138,7 @@ def ema_strategy():
                 # Make trading decisions for each symbol
                 if (
                     short_ema_15min.iloc[-2] >= long_ema_15min.iloc[-2] and
-		            short_ema_15min.iloc[-3] <= long_ema_15min.iloc[-3] and
+		    short_ema_15min.iloc[-3] <= long_ema_15min.iloc[-3] and
                     last_order_types[symbol] != 'BUY'
                 ):
                     print(f'{symbol} Buy Signal (Short EMA cross over Open)')
@@ -153,7 +153,7 @@ def ema_strategy():
                     last_order_types[symbol] == 'BUY' and
                     close_positions[symbol] == 'BUY' and
                     short_ema_15min.iloc[-2] <= medium_ema_15min.iloc[-2] and
-		            short_ema_15min.iloc[-3] >= medium_ema_15min.iloc[-3]
+		    short_ema_15min.iloc[-3] >= medium_ema_15min.iloc[-3]
                 ):
                     print(f'{symbol} Long Exit Signal')
                     # Close existing long position if short EMA crosses below long EMA
@@ -163,7 +163,7 @@ def ema_strategy():
 
                 elif (
                     short_ema_15min.iloc[-2] <= long_ema_15min.iloc[-2] and
-		            short_ema_15min.iloc[-3] >= long_ema_15min.iloc[-3] and
+		    short_ema_15min.iloc[-3] >= long_ema_15min.iloc[-3] and
                     last_order_types[symbol] != 'SELL'
                 ):
                     print(f'{symbol} Sell Signal (Short EMA cross under Open)')
@@ -176,9 +176,9 @@ def ema_strategy():
 
                 elif (
                     last_order_types[symbol] == 'SELL' and
-		            close_positions[symbol] == 'SELL' and
+		    close_positions[symbol] == 'SELL' and
                     short_ema_15min.iloc[-2] >= medium_ema_15min.iloc[-2] and
-		            short_ema_15min.iloc[-3] <= medium_ema_15min.iloc[-3]
+		    short_ema_15min.iloc[-3] <= medium_ema_15min.iloc[-3]
                 ):
                     print(f'{symbol} Short Exit Signal')
                     # Close existing short position if short EMA crosses above long EMA
