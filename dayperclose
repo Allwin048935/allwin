@@ -55,11 +55,11 @@ def place_market_buy_order(symbol, quantity):
             amount=quantity
         )
         print(f"Market Buy Order placed for {symbol}: {order}")
-        close_position[symbol] = 'BUY'
+        close_positions[symbol] = 'BUY'
         return order
     except Exception as e:
         print(f"Error placing Market Buy Order for {symbol}: {e}")
-        close_position[symbol] = 'long'
+        close_positions[symbol] = 'long'
         return None
 
 # Function to place a market sell order
@@ -70,11 +70,11 @@ def place_market_sell_order(symbol, quantity):
             amount=quantity
         )
         print(f"Market Sell Order placed for {symbol}: {order}")
-        close_position[symbol] = 'SELL'
+        close_positions[symbol] = 'SELL'
         return order
     except Exception as e:
         print(f"Error placing Market Sell Order for {symbol}: {e}")
-        close_position[symbol] = 'short'
+        close_positions[symbol] = 'short'
         return None
 
 # Function to close long position
