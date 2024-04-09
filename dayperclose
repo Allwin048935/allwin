@@ -21,7 +21,7 @@ long_ema_period = 1
 last_order_types = {symbol: None for symbol in symbols}
 open_orders = {symbol: None for symbol in symbols}
 open_positions = {symbol: None for symbol in symbols}
-close_positions = None # Initialize open_positions
+close_positions = {symbol: None for symbol in symbols} # Initialize open_positions
 
 # Fixed quantity in USDT worth of contracts
 fixed_quantity_usdt = 6
