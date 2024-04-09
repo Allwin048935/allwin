@@ -21,7 +21,7 @@ long_ema_period = 1
 last_order_types = {symbol: None for symbol in symbols}
 open_orders = {symbol: None for symbol in symbols}
 open_positions = {symbol: None for symbol in symbols}
-close_positions = {symbol: None for symbol in symbols} # Initialize open_positions
+close_positions = None # Initialize open_positions
 
 # Fixed quantity in USDT worth of contracts
 fixed_quantity_usdt = 6
@@ -55,9 +55,11 @@ def place_market_buy_order(symbol, quantity):
             amount=quantity
         )
         print(f"Market Buy Order placed for {symbol}: {order}")
+        close_position[symbol] = 'BUY'
         return order
     except Exception as e:
         print(f"Error placing Market Buy Order for {symbol}: {e}")
+        close_position[symbol] = 'long'
         return None
 
 # Function to place a market sell order
@@ -68,9 +70,11 @@ def place_market_sell_order(symbol, quantity):
             amount=quantity
         )
         print(f"Market Sell Order placed for {symbol}: {order}")
+        close_position[symbol] = 'SELL'
         return order
     except Exception as e:
         print(f"Error placing Market Sell Order for {symbol}: {e}")
+        close_position[symbol] = 'short'
         return None
 
 # Function to close long position
@@ -143,7 +147,6 @@ def ema_strategy():
                     # For example, place a market buy order
                     open_orders[symbol] = place_market_buy_order(symbol, quantity)
                     open_positions[symbol] = 'BUY'
-                    close_positions[symbol] = 'BUY'
                     last_order_types[symbol] = 'BUY'
 
                 elif (
@@ -156,7 +159,6 @@ def ema_strategy():
                     # Close existing long position if short EMA crosses below long EMA
                     close_long_position(symbol, quantity)
                     #open_positions[symbol] = None
-                    close_positions[symbol] = 'long'
 
                 elif (
                     short_ema_15min.iloc[-2] <= latest_open and
@@ -181,7 +183,6 @@ def ema_strategy():
                     # Close existing short position if short EMA crosses above long EMA
                     close_short_position(symbol, quantity)
                     #open_positions[symbol] = None
-                    close_positions[symbol] = 'short'
 
             # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(60)
