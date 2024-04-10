@@ -1,7 +1,7 @@
 import ccxt
 import pandas as pd
 import time
-from config6 import BINANCE_API_KEY, BINANCE_API_SECRET, symbols, time_interval
+from config1 import BINANCE_API_KEY, BINANCE_API_SECRET, symbols, time_interval
 
 # Create a Binance Futures client
 exchange = ccxt.binance({
@@ -139,7 +139,7 @@ def ema_strategy():
                 # Make trading decisions for each symbol
                 if (
                     short_ema_15min.iloc[-2] >= latest_open and
-	        	    short_ema_15min.iloc[-3] <= latest_open and
+		    short_ema_15min.iloc[-3] <= latest_open and
                     last_order_types[symbol] != 'BUY'
                 ):
                     print(f'{symbol} Buy Signal (Short EMA cross over Open)')
@@ -150,7 +150,6 @@ def ema_strategy():
                     last_order_types[symbol] = 'BUY'
 
                 elif (
-                    last_order_types[symbol] == 'BUY' and
                     close_positions[symbol] == 'BUY' and 
                     long_ema_15min.iloc[-2] <= (latest_open*1.01) and
                     long_ema_15min.iloc[-3] >= (latest_open*1.01)
@@ -162,7 +161,7 @@ def ema_strategy():
 
                 elif (
                     short_ema_15min.iloc[-2] <= latest_open and
-	        	    short_ema_15min.iloc[-3] >= latest_open and
+		    short_ema_15min.iloc[-3] >= latest_open and
                     last_order_types[symbol] != 'SELL'
                 ):
                     print(f'{symbol} Sell Signal (Short EMA cross under Open)')
@@ -170,12 +169,10 @@ def ema_strategy():
                     # For example, place a market sell order
                     open_orders[symbol] = place_market_sell_order(symbol, quantity)
                     open_positions[symbol] = 'SELL'
-                    close_positions[symbol] = 'SELL'
                     last_order_types[symbol] = 'SELL'
 
                 elif (
-                    last_order_types[symbol] == 'SELL' and
-	        	    close_positions[symbol] == 'SELL' and
+		    close_positions[symbol] == 'SELL' and
                     long_ema_15min.iloc[-2] >= (latest_open*0.99) and
                     long_ema_15min.iloc[-3] <= (latest_open*0.99)
                 ):
