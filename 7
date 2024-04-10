@@ -87,7 +87,7 @@ def close_long_position(symbol, quantity):
             amount=quantity
         )
         print(f"Closed Long Position for {symbol}: {order}")
-        open_positions[symbol] = None
+        close_positions[symbol] = None
         return order
     except Exception as e:
         print(f"Error closing Long Position for {symbol}: {e}")
@@ -101,7 +101,7 @@ def close_short_position(symbol, quantity):
             amount=quantity
         )
         print(f"Closed Short Position for {symbol}: {order}")
-        open_positions[symbol] = None
+        close_positions[symbol] = None
         return order
     except Exception as e:
         print(f"Error closing Short Position for {symbol}: {e}")
