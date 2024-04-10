@@ -56,7 +56,7 @@ def place_market_buy_order(symbol, quantity):
         )
         print(f"Market Buy Order placed for {symbol}: {order}")
         close_positions[symbol] = 'BUY'
-	last_order_types[symbol] = 'BUY'
+	       last_order_types[symbol] = 'BUY'
         return order
     except Exception as e:
         print(f"Error placing Market Buy Order for {symbol}: {e}")
