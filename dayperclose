@@ -150,7 +150,6 @@ def ema_strategy():
                     last_order_types[symbol] = 'BUY'
 
                 elif (
-                    last_order_types[symbol] == 'BUY' and
                     close_positions[symbol] == 'BUY' and 
                     long_ema_15min.iloc[-2] <= (latest_open*1.01) and
                     long_ema_15min.iloc[-3] >= (latest_open*1.01)
@@ -174,7 +173,6 @@ def ema_strategy():
                     last_order_types[symbol] = 'SELL'
 
                 elif (
-                    last_order_types[symbol] == 'SELL' and
 		    close_positions[symbol] == 'SELL' and
                     long_ema_15min.iloc[-2] >= (latest_open*0.99) and
                     long_ema_15min.iloc[-3] <= (latest_open*0.99)
