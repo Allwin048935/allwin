@@ -173,7 +173,7 @@ def ema_strategy():
 
                 elif (
 		    close_positions[symbol] == 'SELL' and
-                    last_order_types[symbol] == 'SELL'
+                    last_order_types[symbol] == 'SELL' and
                     long_ema_15min.iloc[-2] >= (latest_open*0.99) and
                     long_ema_15min.iloc[-3] <= (latest_open*0.99)
                 ):
