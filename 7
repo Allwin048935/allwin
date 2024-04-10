@@ -149,10 +149,10 @@ def ema_strategy():
                     # For example, place a market buy order
                     open_orders[symbol] = place_market_buy_order(symbol, quantity)
                     open_positions[symbol] = 'BUY'
-                    last_order_types[symbol] = 'BUY'
 
                 elif (
-                    close_positions[symbol] == 'BUY' and 
+                    close_positions[symbol] == 'BUY' and
+		    last_order_types[symbol] == 'BUY' and
                     long_ema_15min.iloc[-2] <= (latest_open*1.01) and
                     long_ema_15min.iloc[-3] >= (latest_open*1.01)
                 ):
@@ -170,10 +170,10 @@ def ema_strategy():
                     # For example, place a market sell order
                     open_orders[symbol] = place_market_sell_order(symbol, quantity)
                     open_positions[symbol] = 'SELL'
-                    last_order_types[symbol] = 'SELL'
 
                 elif (
 		    close_positions[symbol] == 'SELL' and
+                    last_order_types[symbol] == 'SELL'
                     long_ema_15min.iloc[-2] >= (latest_open*0.99) and
                     long_ema_15min.iloc[-3] <= (latest_open*0.99)
                 ):
