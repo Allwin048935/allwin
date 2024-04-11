@@ -1,7 +1,7 @@
 import ccxt
 import pandas as pd
 import time
-from config8 import BINANCE_API_KEY, BINANCE_API_SECRET, symbols, time_interval
+from config1 import BINANCE_API_KEY, BINANCE_API_SECRET, symbols, time_interval
 
 # Create a Binance Futures client
 exchange = ccxt.binance({
@@ -188,11 +188,11 @@ def ema_strategy():
                     close_short_position(symbol, quantity)
 
             # Sleep for some time (e.g., 5 minutes) before checking again
-            time.sleep(60)
+            time.sleep(180)
 
         except Exception as e:
             print(f'An error occurred: {e}')
-            time.sleep(60)  # Wait for a minute before trying again
+            time.sleep(180)  # Wait for a minute before trying again
 
 # Run the trading strategy
 ema_strategy()
