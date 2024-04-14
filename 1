@@ -150,7 +150,7 @@ def ema_strategy():
                     print(f'{symbol} Buy Signal (Crossover)')
                     # Implement your buy logic here for futures
                     # For example, place a market buy order
-                    open_orders[symbol] = place_market_buy_order(symbol, quantity)
+                    open_positions[symbol] = place_market_buy_order(symbol, quantity)
                     last_order_types[symbol] = 'BUY'
 
                 elif (
@@ -163,7 +163,7 @@ def ema_strategy():
                     print(f'{symbol} Sell Signal (Crossunder)')
                     # Implement your sell logic here for futures
                     # For example, place a market sell order
-                    open_orders[symbol] = place_market_sell_order(symbol, quantity)
+                    open_positions[symbol] = place_market_sell_order(symbol, quantity)
                     last_order_types[symbol] = 'SELL'
 
             # Sleep for some time (e.g., 5 minutes) before checking again
