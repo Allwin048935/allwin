@@ -111,7 +111,7 @@ def ema_strategy():
         try:
             for symbol in symbols:
                 # Fetch historical data for each symbol with a 15-minute time interval
-                historical_data = fetch_ohlcv(symbol, '1h', 20)
+                historical_data = fetch_ohlcv(symbol, '1h', 50)
 
                 if historical_data is None:
                     continue  # Skip to the next symbol if there's an error fetching data
