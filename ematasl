@@ -14,8 +14,8 @@ exchange = ccxt.binance({
 })
 
 # Define EMA strategy parameters
-short_ema_period = 9
-long_ema_period = 1
+short_ema_period = 2
+long_ema_period = 14
 
 # Track the last order type placed for each symbol
 last_order_types = {symbol: None for symbol in symbols}
@@ -111,7 +111,7 @@ def ema_strategy():
         try:
             for symbol in symbols:
                 # Fetch historical data for each symbol with a 15-minute time interval
-                historical_data = fetch_ohlcv(symbol, '1m', 100)
+                historical_data = fetch_ohlcv(symbol, '1h', 20)
 
                 if historical_data is None:
                     continue  # Skip to the next symbol if there's an error fetching data
@@ -122,7 +122,7 @@ def ema_strategy():
                     continue
 
                 # Fetch the latest candlestick for each symbol
-                latest_candle = exchange.fetch_ohlcv(symbol, '1d', limit=1)
+                latest_candle = exchange.fetch_ohlcv(symbol, '1h', limit=10)
                 latest_open = latest_candle[0][1]
                 #latest_candle_min = exchange.fetch_ohlcv(symbol, '5m', limit=1)
                 #latest_open_min = latest_candle[0][1]  # Open price of the latest candle
@@ -151,8 +151,7 @@ def ema_strategy():
 
                 elif (
                     close_positions[symbol] == 'BUY' and 
-                    long_ema_15min.iloc[-2] <= (latest_open*1.01) and
-                    long_ema_15min.iloc[-3] >= (latest_open*1.01)
+                    short_ema_15min.iloc[-2] >= latest_open
                 ):
                     print(f'{symbol} Long Exit Signal')
                     # Close existing long position if short EMA crosses below long EMA
@@ -172,8 +171,7 @@ def ema_strategy():
 
                 elif (
 		    close_positions[symbol] == 'SELL' and
-                    long_ema_15min.iloc[-2] >= (latest_open*0.99) and
-                    long_ema_15min.iloc[-3] <= (latest_open*0.99)
+                    short_ema_15min.iloc[-2] <= latest_open
                 ):
                     print(f'{symbol} Short Exit Signal')
                     # Close existing short position if short EMA crosses above long EMA
