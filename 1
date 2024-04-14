@@ -112,32 +112,6 @@ def place_market_sell_order(symbol, quantity):
     except Exception as e:
         print(f"Error placing Market Sell Order for {symbol}: {e}")
 
-# Function to close long position
-def close_long_position(symbol, quantity):
-    try:
-        order = exchange.create_market_sell_order(
-            symbol=symbol,
-            amount=quantity
-        )
-        print(f"Closed Long Position for {symbol}: {order}")
-        open_positions[symbol] = None
-        return order
-    except Exception as e:
-        print(f"Error closing Long Position for {symbol}: {e}")
-
-# Function to close short position
-def close_short_position(symbol, quantity):
-    try:
-        order = exchange.create_market_buy_order(
-            symbol=symbol,
-            amount=quantity
-        )
-        print(f"Closed Short Position for {symbol}: {order}")
-        open_positions[symbol] = None
-        return order
-    except Exception as e:
-        print(f"Error closing Short Position for {symbol}: {e}")
-
 # Main trading function for futures
 def ema_strategy():
     while True:
@@ -179,96 +153,33 @@ def ema_strategy():
                 # Calculate the quantity based on the fixed USDT value
                 quantity = fixed_quantity_usdt / float(latest_close)
                 
-                # save the side
-                srsi_long = ((historical_data['stoch_rsi_k'].iloc[-2] > historical_data['stoch_rsi_d'].iloc[-2] and
-                    historical_data['stoch_rsi_k'].iloc[-3] < historical_data['stoch_rsi_d'].iloc[-3]) or
-                    (historical_data['stoch_rsi_k'].iloc[-3] > historical_data['stoch_rsi_d'].iloc[-3] and
-                    historical_data['stoch_rsi_k'].iloc[-4] < historical_data['stoch_rsi_d'].iloc[-4]))
-
-                ma_long = short_ema_values.iloc[-2] > short_ema_values.iloc[-3]
-
-                srsi_long_threshold = historical_data['stoch_rsi_k'].iloc[-2] < 0.3
-
-                BUY_Signal = srsi_long and ma_long and srsi_long_threshold
-
-                srsi_short = ((historical_data['stoch_rsi_k'].iloc[-2] < historical_data['stoch_rsi_d'].iloc[-2] and
-                            historical_data['stoch_rsi_k'].iloc[-3] > historical_data['stoch_rsi_d'].iloc[-3]) or
-                            (historical_data['stoch_rsi_k'].iloc[-3] < historical_data['stoch_rsi_d'].iloc[-3] and
-                            historical_data['stoch_rsi_k'].iloc[-4] > historical_data['stoch_rsi_d'].iloc[-4]))
-
-                ma_short = short_ema_values.iloc[-2] < short_ema_values.iloc[-3]
-
-                srsi_short_threshold = historical_data['stoch_rsi_k'].iloc[-2] > 0.7
-
-                SELL_Signal = srsi_short and ma_short and srsi_short_threshold
-
-                srsi_long_close = historical_data['stoch_rsi_k'].iloc[-2] < historical_data['stoch_rsi_k'].iloc[-3]
-                ma_long_close = short_ema_values.iloc[-2] < short_ema_values.iloc[-3]
-                Long_Close = srsi_long_close and ma_long_close
-
-                srsi_short_close = historical_data['stoch_rsi_k'].iloc[-2] > historical_data['stoch_rsi_k'].iloc[-3]
-                ma_short_close = short_ema_values.iloc[-2] > short_ema_values.iloc[-3]
-                Short_Close = srsi_short_close and ma_short_close
-
+                
                 # Make trading decisions for each symbol
-                # Check conditions and execute trades
                 if (
-                    last_order_types[symbol] != 'LONG' and
-                    BUY_Signal
-                ):
-                    # Long Entry Signal
-                    if (
-                        srsi_long and
-                        ma_long and
-                        srsi_long_threshold
-                    ):
-                        print(f'{symbol} Long Entry Signal')
-                        # Close existing short position if any
-                        if open_positions[symbol] == 'SHORT':
-                            close_short_position(symbol, quantity)
-                        # Place a market buy order to enter long position
-                        place_market_buy_order(symbol, quantity)
-                        open_positions[symbol] = 'LONG'
-                        last_order_types[symbol] = 'LONG'
+    (
+        historical_data['stoch_rsi_k'].iloc[-2] > historical_data['stoch_rsi_d'].iloc[-2] and
+        historical_data['stoch_rsi_k'].iloc[-3] < historical_data['stoch_rsi_d'].iloc[-3] and
+        last_order_types[symbol] != 'BUY'
+    )
+):
+                    print(f'{symbol} Buy Signal (Crossover)')
+                    # Implement your buy logic here for futures
+                    # For example, place a market buy order
+                    open_orders[symbol] = place_market_buy_order(symbol, quantity)
+                    last_order_types[symbol] = 'BUY'
 
                 elif (
-                    open_positions[symbol] == 'LONG' and
-                    Long_Close
-                ):
-                    # Long Exit Signal
-                    print(f'{symbol} Long Exit Signal')
-                    # Close existing long position
-                    close_long_position(symbol, quantity)
-                    open_positions[symbol] = None
-
-                elif (
-                    last_order_types[symbol] != 'SHORT' and
-                    SELL_Signal
-                ):
-                    # Short Entry Signal
-                    if (
-                        srsi_short and
-                        ma_short and
-                        srsi_short_threshold
-                    ):
-                        print(f'{symbol} Short Entry Signal')
-                        # Close existing long position if any
-                        if open_positions[symbol] == 'LONG':
-                            close_long_position(symbol, quantity)
-                        # Place a market sell order to enter short position
-                        place_market_sell_order(symbol, quantity)
-                        open_positions[symbol] = 'SHORT'
-                        last_order_types[symbol] = 'SHORT'
-
-                elif (
-                    open_positions[symbol] == 'SHORT' and
-                    Short_Close
-                ):
-                    # Short Exit Signal
-                    print(f'{symbol} Short Exit Signal')
-                    # Close existing short position
-                    close_short_position(symbol, quantity)
-                    open_positions[symbol] = None
+    (
+        historical_data['stoch_rsi_k'].iloc[-2] < historical_data['stoch_rsi_d'].iloc[-2] and
+        historical_data['stoch_rsi_k'].iloc[-3] > historical_data['stoch_rsi_d'].iloc[-3] and
+        last_order_types[symbol] != 'SELL'
+    )
+):
+                    print(f'{symbol} Sell Signal (Crossunder)')
+                    # Implement your sell logic here for futures
+                    # For example, place a market sell order
+                    open_orders[symbol] = place_market_sell_order(symbol, quantity)
+                    last_order_types[symbol] = 'SELL'
 
             # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(300)
