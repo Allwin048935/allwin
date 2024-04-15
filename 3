@@ -145,8 +145,8 @@ def ema_strategy():
                 # Make trading decisions for each symbol
                 if (
                     (open_positions[symbol] == 'BUY' and 
-                    long_ema_15min.iloc[-2] <= (latest_open*1.005) and
-                    long_ema_15min.iloc[-3] >= (latest_open*1.005)) or
+                    short_ema_15min.iloc[-2] <= (latest_open*1.005) and
+                    short_ema_15min.iloc[-3] >= (latest_open*1.005)) or
 
                     (open_positions[symbol] == 'BUY' and 
                     long_ema_15min.iloc[-2] <= (latest_open*1.01) and
@@ -194,8 +194,8 @@ def ema_strategy():
 
                 elif (
                     (open_positions[symbol] == 'SELL' and
-                    long_ema_15min.iloc[-2] >= (latest_open*0.995) and
-                    long_ema_15min.iloc[-3] <= (latest_open*0.995)) or
+                    short_ema_15min.iloc[-2] >= (latest_open*0.995) and
+                    short_ema_15min.iloc[-3] <= (latest_open*0.995)) or
 
                     (open_positions[symbol] == 'SELL' and
                     long_ema_15min.iloc[-2] >= (latest_open*0.99) and
