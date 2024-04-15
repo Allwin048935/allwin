@@ -60,7 +60,7 @@ def place_market_buy_order(symbol, quantity):
         return order
     except Exception as e:
         print(f"Error placing Market Buy Order for {symbol}: {e}")
-        open_positions[symbol] = 'BUY'
+        open_positions[symbol] = 'ABCD'
         last_order_types[symbol] = 'BUY'
         return None
 
@@ -77,7 +77,7 @@ def place_market_sell_order(symbol, quantity):
         return order
     except Exception as e:
         print(f"Error placing Market Sell Order for {symbol}: {e}")
-        open_positions[symbol] = 'SELL'
+        open_positions[symbol] = 'EFGH'
         last_order_types[symbol] = 'SELL'
         return None
 
