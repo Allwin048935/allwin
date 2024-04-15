@@ -55,11 +55,13 @@ def place_market_buy_order(symbol, quantity):
             amount=quantity
         )
         print(f"Market Buy Order placed for {symbol}: {order}")
-        close_positions[symbol] = 'BUY'
+        last_order_types[symbol] = 'BUY'
+        open_positions[symbol] = 'BUY'
         return order
     except Exception as e:
         print(f"Error placing Market Buy Order for {symbol}: {e}")
-        close_positions[symbol] = 'long'
+        open_positions[symbol] = 'BUY'
+        last_order_types[symbol] = 'BUY'
         return None
 
 # Function to place a market sell order
@@ -70,11 +72,13 @@ def place_market_sell_order(symbol, quantity):
             amount=quantity
         )
         print(f"Market Sell Order placed for {symbol}: {order}")
-        close_positions[symbol] = 'SELL'
+        open_positions[symbol] = 'SELL'
+        last_order_types[symbol] = 'SELL'
         return order
     except Exception as e:
         print(f"Error placing Market Sell Order for {symbol}: {e}")
-        close_positions[symbol] = 'short'
+        open_positions[symbol] = 'SELL'
+        last_order_types[symbol] = 'SELL'
         return None
 
 # Function to close long position
@@ -138,47 +142,47 @@ def ema_strategy():
 
                 # Make trading decisions for each symbol
                 if (
-                    (close_positions[symbol] == 'BUY' and 
+                    (open_positions[symbol] == 'BUY' and 
                     long_ema_15min.iloc[-2] <= (latest_open*1.005) and
                     long_ema_15min.iloc[-3] >= (latest_open*1.005)) or
 
-                    (close_positions[symbol] == 'BUY' and 
+                    (open_positions[symbol] == 'BUY' and 
                     long_ema_15min.iloc[-2] <= (latest_open*1.01) and
                     long_ema_15min.iloc[-3] >= (latest_open*1.01)) or
 
-                    (close_positions[symbol] == 'BUY' and 
+                    (open_positions[symbol] == 'BUY' and 
                     long_ema_15min.iloc[-2] <= (latest_open*1.015) and
                     long_ema_15min.iloc[-3] >= (latest_open*1.015)) or
 
-                    (close_positions[symbol] == 'BUY' and 
+                    (open_positions[symbol] == 'BUY' and 
                     long_ema_15min.iloc[-2] <= (latest_open*1.02) and
                     long_ema_15min.iloc[-3] >= (latest_open*1.02)) or
 
-                    (close_positions[symbol] == 'BUY' and 
+                    (open_positions[symbol] == 'BUY' and 
                     long_ema_15min.iloc[-2] <= (latest_open*1.01) and
                     long_ema_15min.iloc[-3] >= (latest_open*1.01)) or
 
-                    (close_positions[symbol] == 'BUY' and 
+                    (open_positions[symbol] == 'BUY' and 
                     long_ema_15min.iloc[-2] <= (latest_open*1.025) and
                     long_ema_15min.iloc[-3] >= (latest_open*1.025)) or
 
-                    (close_positions[symbol] == 'BUY' and 
+                    (open_positions[symbol] == 'BUY' and 
                     long_ema_15min.iloc[-2] <= (latest_open*1.03) and
                     long_ema_15min.iloc[-3] >= (latest_open*1.03)) or
 
-                    (close_positions[symbol] == 'BUY' and 
+                    (open_positions[symbol] == 'BUY' and 
                     long_ema_15min.iloc[-2] <= (latest_open*1.035) and
                     long_ema_15min.iloc[-3] >= (latest_open*1.035)) or
 
-                    (close_positions[symbol] == 'BUY' and 
+                    (open_positions[symbol] == 'BUY' and 
                     long_ema_15min.iloc[-2] <= (latest_open*1.04) and
                     long_ema_15min.iloc[-3] >= (latest_open*1.04)) or
 
-                    (close_positions[symbol] == 'BUY' and 
+                    (open_positions[symbol] == 'BUY' and 
                     long_ema_15min.iloc[-2] <= (latest_open*1.045) and
                     long_ema_15min.iloc[-3] >= (latest_open*1.045)) or
 
-                    (close_positions[symbol] == 'BUY' and 
+                    (open_positions[symbol] == 'BUY' and 
                     long_ema_15min.iloc[-2] <= (latest_open*1.05) and
                     long_ema_15min.iloc[-3] >= (latest_open*1.05))
                 ):
@@ -187,43 +191,43 @@ def ema_strategy():
                     close_long_position(symbol, quantity)
 
                 elif (
-                    (close_positions[symbol] == 'SELL' and
+                    (open_positions[symbol] == 'SELL' and
                     long_ema_15min.iloc[-2] >= (latest_open*0.995) and
                     long_ema_15min.iloc[-3] <= (latest_open*0.995)) or
 
-                    (close_positions[symbol] == 'SELL' and
+                    (open_positions[symbol] == 'SELL' and
                     long_ema_15min.iloc[-2] >= (latest_open*0.99) and
                     long_ema_15min.iloc[-3] <= (latest_open*0.99)) or
 
-                    (close_positions[symbol] == 'SELL' and
+                    (open_positions[symbol] == 'SELL' and
                     long_ema_15min.iloc[-2] >= (latest_open*0.985) and
                     long_ema_15min.iloc[-3] <= (latest_open*0.985)) or
 
-                    (close_positions[symbol] == 'SELL' and
+                    (open_positions[symbol] == 'SELL' and
                     long_ema_15min.iloc[-2] >= (latest_open*0.98) and
                     long_ema_15min.iloc[-3] <= (latest_open*0.98)) or
 
-                    (close_positions[symbol] == 'SELL' and
+                    (open_positions[symbol] == 'SELL' and
                     long_ema_15min.iloc[-2] >= (latest_open*0.975) and
                     long_ema_15min.iloc[-3] <= (latest_open*0.975)) or
 
-                    (close_positions[symbol] == 'SELL' and
+                    (open_positions[symbol] == 'SELL' and
                     long_ema_15min.iloc[-2] >= (latest_open*0.97) and
                     long_ema_15min.iloc[-3] <= (latest_open*0.97)) or
 
-                    (close_positions[symbol] == 'SELL' and
+                    (open_positions[symbol] == 'SELL' and
                     long_ema_15min.iloc[-2] >= (latest_open*0.965) and
                     long_ema_15min.iloc[-3] <= (latest_open*0.965)) or
 
-                    (close_positions[symbol] == 'SELL' and
+                    (open_positions[symbol] == 'SELL' and
                     long_ema_15min.iloc[-2] >= (latest_open*0.96) and
                     long_ema_15min.iloc[-3] <= (latest_open*0.96)) or
 
-                    (close_positions[symbol] == 'SELL' and
+                    (open_positions[symbol] == 'SELL' and
                     long_ema_15min.iloc[-2] >= (latest_open*0.955) and
                     long_ema_15min.iloc[-3] <= (latest_open*0.955)) or
 
-                    (close_positions[symbol] == 'SELL' and
+                    (open_positions[symbol] == 'SELL' and
                     long_ema_15min.iloc[-2] >= (latest_open*0.95) and
                     long_ema_15min.iloc[-3] <= (latest_open*0.95))
                 ):
@@ -240,8 +244,6 @@ def ema_strategy():
                     # Implement your buy logic here for futures
                     # For example, place a market buy order
                     open_orders[symbol] = place_market_buy_order(symbol, quantity)
-                    open_positions[symbol] = 'BUY'
-                    last_order_types[symbol] = 'BUY'
 
                 elif (
                     short_ema_15min.iloc[-2] <= latest_open and
@@ -252,8 +254,6 @@ def ema_strategy():
                     # Implement your sell logic here for futures
                     # For example, place a market sell order
                     open_orders[symbol] = place_market_sell_order(symbol, quantity)
-                    open_positions[symbol] = 'SELL'
-                    last_order_types[symbol] = 'SELL'
 
             # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(60)
