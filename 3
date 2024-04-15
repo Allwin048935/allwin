@@ -210,28 +210,28 @@ def ema_strategy():
                     long_ema_15min.iloc[-3] <= (latest_open*0.98)) or
 
                     (open_positions[symbol] == 'SELL' and
-                    long_ema_15min.iloc[-2] >= (latest_open*0.975) and
-                    long_ema_15min.iloc[-3] <= (latest_open*0.975)) or
-
-                    (open_positions[symbol] == 'SELL' and
                     long_ema_15min.iloc[-2] >= (latest_open*0.97) and
                     long_ema_15min.iloc[-3] <= (latest_open*0.97)) or
-
-                    (open_positions[symbol] == 'SELL' and
-                    long_ema_15min.iloc[-2] >= (latest_open*0.965) and
-                    long_ema_15min.iloc[-3] <= (latest_open*0.965)) or
 
                     (open_positions[symbol] == 'SELL' and
                     long_ema_15min.iloc[-2] >= (latest_open*0.96) and
                     long_ema_15min.iloc[-3] <= (latest_open*0.96)) or
 
                     (open_positions[symbol] == 'SELL' and
-                    long_ema_15min.iloc[-2] >= (latest_open*0.955) and
-                    long_ema_15min.iloc[-3] <= (latest_open*0.955)) or
+                    long_ema_15min.iloc[-2] >= (latest_open*0.95) and
+                    long_ema_15min.iloc[-3] <= (latest_open*0.95)) or
 
                     (open_positions[symbol] == 'SELL' and
-                    long_ema_15min.iloc[-2] >= (latest_open*0.95) and
-                    long_ema_15min.iloc[-3] <= (latest_open*0.95))
+                    long_ema_15min.iloc[-2] >= (latest_open*0.94) and
+                    long_ema_15min.iloc[-3] <= (latest_open*0.94)) or
+
+                    (open_positions[symbol] == 'SELL' and
+                    long_ema_15min.iloc[-2] >= (latest_open*0.93) and
+                    long_ema_15min.iloc[-3] <= (latest_open*0.93)) or
+
+                    (open_positions[symbol] == 'SELL' and
+                    long_ema_15min.iloc[-2] >= (latest_open*0.92) and
+                    long_ema_15min.iloc[-3] <= (latest_open*0.92))
                 ):
                     print(f'{symbol} Short Exit Signal')
                     # Close existing short position if short EMA crosses above long EMA
