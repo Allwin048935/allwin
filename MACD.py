@@ -146,9 +146,9 @@ def macd_strategy():
                 macd_line, signal_line, histogram = calculate_macd(historical_data['close'])
 
                 # Print MACD values
-                print(f"MACD Line for {symbol}: {macd_line.iloc[-1]}")
-                print(f"Signal Line for {symbol}: {signal_line.iloc[-1]}")
-                print(f"Histogram for {symbol}: {histogram.iloc[-1]}")
+                print(f"MACD Line for {symbol}: {macd_line.iloc[-2]}")
+                print(f"Signal Line for {symbol}: {signal_line.iloc[-2]}")
+                print(f"Histogram for {symbol}: {histogram.iloc[-2]}")
 
                 # Make trading decisions for each symbol
                 # Add your trading strategy logic here
