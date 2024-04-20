@@ -6,8 +6,12 @@ import time
 # Define your Binance API key, secret, symbols, and time interval
 BINANCE_API_KEY = 'veiqd07BuRmMlxy3eeRLLKNyDnFrIphTcqgSM7XTRUCzQWTyqxK4sPtfVZioaVHi'
 BINANCE_API_SECRET = 'N4myBDNkkD203gxxpo8NLQgdZxdvzm7N7PpBjBU0DiTtctTLaFQEVev51N4P5R5g'
-symbols = ['BTC/USDT']  # Add more symbols if needed
-time_interval = '1m'  # Time interval for fetching candlestick data
+symbols = [
+    'AAVEUSDT', 'ACEUSDT', 'ACHUSDT', 'ADAUSDT', 'AEVOUSDT', 'AGIXUSDT', 'AGLDUSDT', 'AIUSDT', 'ALGOUSDT', 'ALICEUSDT', 'ALPHAUSDT', 'ALTUSDT', 'AMBUSDT', 'ANKRUSDT', 'APEUSDT', 'API3USDT', 'APTUSDT', 'ARBUSDT', 'ARKUSDT', 'ARKMUSDT', 'ARPAUSDT', 'ARUSDT', 'ASTRUSDT', 'ATAUSDT', 'ATOMUSDT', 'AUDIOUSDT', 'AUCTIONUSDT', 'AXLUSDT',
+    'AVAXUSDT', 'AXSUSDT'
+]
+  # Add more symbols if needed
+time_interval = '1h'  # Time interval for fetching candlestick data
 
 # Create a Binance Futures client
 exchange = ccxt.binance({
