@@ -156,12 +156,17 @@ def macd_strategy():
                 # Calculate MACD
                 macd_line, signal_line, histogram = calculate_macd(historical_data['close'])
 
-                # Print MACD values
+                # Calculate StochRSI
+                stoch_rsi_k = historical_data['stoch_rsi_k']
+                stoch_rsi_d = historical_data['stoch_rsi_d']
+
+                # Print MACD and StochRSI values
                 print(f"MACD Line for {symbol}: {macd_line.iloc[-2]}")
                 print(f"Signal Line for {symbol}: {signal_line.iloc[-2]}")
                 print(f"Histogram for {symbol}: {histogram.iloc[-2]}")
                 print(f"StochRSI K: {stoch_rsi_k.iloc[-2]}")
                 print(f"StochRSI D: {stoch_rsi_d.iloc[-2]}")
+
                 # Make trading decisions for each symbol
                 # Add your trading strategy logic here
 
@@ -174,3 +179,4 @@ def macd_strategy():
 
 # Run the trading strategy
 macd_strategy()
+
