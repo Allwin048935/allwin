@@ -160,8 +160,8 @@ def macd_strategy():
                 print(f"MACD Line for {symbol}: {macd_line.iloc[-2]}")
                 print(f"Signal Line for {symbol}: {signal_line.iloc[-2]}")
                 print(f"Histogram for {symbol}: {histogram.iloc[-2]}")
-                print(f"StochRSI K: {stochrsi_k.iloc[-2]}")
-                print(f"StochRSI D: {stochrsi_d.iloc[-2]}")
+                print(f"StochRSI K: {stoch_rsi_k.iloc[-2]}")
+                print(f"StochRSI D: {stoch_rsi_d.iloc[-2]}")
                 # Make trading decisions for each symbol
                 # Add your trading strategy logic here
 
