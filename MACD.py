@@ -2,6 +2,7 @@ import ccxt
 import pandas as pd
 import numpy as np
 import time
+import ta
 
 # Define your Binance API key, secret, symbols, and time interval
 BINANCE_API_KEY = 'veiqd07BuRmMlxy3eeRLLKNyDnFrIphTcqgSM7XTRUCzQWTyqxK4sPtfVZioaVHi'
