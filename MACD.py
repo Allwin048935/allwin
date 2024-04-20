@@ -19,10 +19,10 @@ exchange = ccxt.binance({
     }
 })
 
-# Define EMA strategy parameters
-short_ema_period = 12
-long_ema_period = 26
-stoch_rsi_period = 14
+# Define MACD strategy parameters
+short_window = 12
+long_window = 26
+signal_window = 9
 
 # Track the last order type placed for each symbol
 last_order_types = {symbol: None for symbol in symbols}
@@ -33,55 +33,27 @@ close_positions = {symbol: None for symbol in symbols}
 # Fixed quantity in USDT worth of contracts
 fixed_quantity_usdt = 6
 
-# Function to fetch historical data for futures with EMA, StochRSI, and MACD calculation
+# Function to fetch historical data for futures with MACD calculation
 def fetch_ohlcv(symbol, timeframe, limit):
     try:
         ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
         df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
-        # Calculate short and long EMAs
-        df['short_ema'] = calculate_ema(df, short_ema_period)
-        df['long_ema'] = calculate_ema(df, long_ema_period)
-
-        # Calculate MACD
-        df['macd'], df['signal_line'], df['histogram'] = calculate_macd(df['close'])
-
-        # Calculate StochRSI
-        df['stoch_rsi_k'], df['stoch_rsi_d'] = calculate_stoch_rsi(df['close'], stoch_rsi_period)
-
         df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
         df.set_index('timestamp', inplace=True)
         return df
-
-# Function to calculate EMA
-def calculate_ema(df, period, column='close'):
-    return df[column].ewm(span=period, adjust=False).mean()
+    except Exception as e:
+        print(f"Error fetching data for {symbol}: {e}")
+        return None
 
 # Function to calculate MACD
 def calculate_macd(close_prices, short_window=12, long_window=26, signal_window=9):
-    short_ema = close_prices.ewm(span=short_window, min_periods=1, adjust=False).mean()
-    long_ema = close_prices.ewm(span=long_window, min_periods=1, adjust=False).mean()
+    short_ema = close_prices.rolling(window=short_window, min_periods=1).mean()
+    long_ema = close_prices.rolling(window=long_window, min_periods=1).mean()
     macd_line = short_ema - long_ema
-    signal_line = macd_line.ewm(span=signal_window, min_periods=1, adjust=False).mean()
+    signal_line = macd_line.rolling(window=signal_window, min_periods=1).mean()
     histogram = macd_line - signal_line
     return macd_line, signal_line, histogram
-
-# Function to calculate StochRSI
-def calculate_stoch_rsi(close_prices, period=14, smooth_k=3, smooth_d=3):
-    delta = close_prices.diff()
-    gain = delta.where(delta > 0, 0)
-    loss = -delta.where(delta < 0, 0)
-
-    avg_gain = gain.rolling(window=period, min_periods=1).mean()
-    avg_loss = loss.rolling(window=period, min_periods=1).mean()
-
-    rs = avg_gain / avg_loss
-    rsi = 100 - (100 / (1 + rs))
-
-    stoch_rsi_k = (rsi - rsi.rolling(window=smooth_k, min_periods=1).min()) / (rsi.rolling(window=smooth_k, min_periods=1).max() - rsi.rolling(window=smooth_k, min_periods=1).min())
-    stoch_rsi_d = stoch_rsi_k.rolling(window=smooth_d, min_periods=1).mean()
-
-    return stoch_rsi_k, stoch_rsi_d
 
 # Function to place a market buy order
 def place_market_buy_order(symbol, quantity):
@@ -147,8 +119,8 @@ def close_short_position(symbol, quantity):
         open_positions[symbol] = 'sold'
         return None
 
-# Main trading function for futures with EMA, StochRSI, and MACD strategy
-def ema_stochrsi_macd_strategy():
+# Main trading function for futures with MACD strategy
+def macd_strategy():
     while True:
         try:
             for symbol in symbols:
@@ -158,8 +130,8 @@ def ema_stochrsi_macd_strategy():
                 if historical_data is None:
                     continue  # Skip to the next symbol if there's an error fetching data
 
-                # Check if there's enough data for EMA, StochRSI, and MACD calculation
-                if len(historical_data) < long_ema_period:
+                # Check if there's enough data for MACD calculation
+                if len(historical_data) < long_window:
                     print(f"Not enough data for {symbol}. Waiting for more data...")
                     continue
 
@@ -170,13 +142,6 @@ def ema_stochrsi_macd_strategy():
                 # Calculate the quantity based on the fixed USDT value
                 quantity = fixed_quantity_usdt / float(latest_open)
 
-                # Calculate short EMA over a 15-minute interval
-                short_ema_15min = calculate_ema(historical_data, short_ema_period, column='close')
-                long_ema_15min = calculate_ema(historical_data, long_ema_period, column='close')
-
-                # Calculate StochRSI
-                stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(historical_data['close'], stoch_rsi_period)
-
                 # Calculate MACD
                 macd_line, signal_line, histogram = calculate_macd(historical_data['close'])
 
@@ -184,10 +149,6 @@ def ema_stochrsi_macd_strategy():
                 print(f"MACD Line for {symbol}: {macd_line.iloc[-1]}")
                 print(f"Signal Line for {symbol}: {signal_line.iloc[-1]}")
                 print(f"Histogram for {symbol}: {histogram.iloc[-1]}")
-
-                # Print StochRSI values
-                print(f"StochRSI K for {symbol}: {stoch_rsi_k.iloc[-1]}")
-                print(f"StochRSI D for {symbol}: {stoch_rsi_d.iloc[-1]}")
 
                 # Make trading decisions for each symbol
                 # Add your trading strategy logic here
@@ -200,4 +161,4 @@ def ema_stochrsi_macd_strategy():
             time.sleep(60)  # Wait for a minute before trying again
 
 # Run the trading strategy
-ema_stochrsi_macd_strategy()
+macd_strategy()
