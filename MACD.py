@@ -58,13 +58,20 @@ def fetch_ohlcv(symbol, timeframe, limit):
         print(f"Error fetching data for {symbol}: {e}")
         return None
 
-# Function to calculate MACD
 def calculate_macd(close_prices, short_window=12, long_window=26, signal_window=9):
     short_ema = close_prices.rolling(window=short_window, min_periods=1).mean()
     long_ema = close_prices.rolling(window=long_window, min_periods=1).mean()
     macd_line = short_ema - long_ema
     signal_line = macd_line.rolling(window=signal_window, min_periods=1).mean()
     histogram = macd_line - signal_line
+    
+    # Print intermediate results for verification
+    print("Short EMA:", short_ema.iloc[-2])
+    print("Long EMA:", long_ema.iloc[-2])
+    print("MACD Line:", macd_line.iloc[-2])
+    print("Signal Line:", signal_line.iloc[-2])
+    print("Histogram:", histogram.iloc[-2])
+    
     return macd_line, signal_line, histogram
 
 # Function to place a market buy order
@@ -162,9 +169,9 @@ def macd_strategy():
                 stoch_rsi_d = historical_data['stoch_rsi_d']
 
                 # Print MACD and StochRSI values
-                print(f"MACD Line for {symbol}: {macd_line.iloc[-2]}")
-                print(f"Signal Line for {symbol}: {signal_line.iloc[-2]}")
-                print(f"Histogram for {symbol}: {histogram.iloc[-2]}")
+                # print(f"MACD Line for {symbol}: {macd_line.iloc[-2]}")
+                # print(f"Signal Line for {symbol}: {signal_line.iloc[-2]}")
+                # print(f"Histogram for {symbol}: {histogram.iloc[-2]}")
                 print(f"StochRSI K: {stoch_rsi_k.iloc[-2]}")
                 print(f"StochRSI D: {stoch_rsi_d.iloc[-2]}")
 
