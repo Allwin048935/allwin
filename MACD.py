@@ -43,6 +43,7 @@ def fetch_ohlcv(symbol, timeframe, limit):
         ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
         df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
+
         df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
         df.set_index('timestamp', inplace=True)
         return df
@@ -153,7 +154,8 @@ def macd_strategy():
                 print(f"MACD Line for {symbol}: {macd_line.iloc[-2]}")
                 print(f"Signal Line for {symbol}: {signal_line.iloc[-2]}")
                 print(f"Histogram for {symbol}: {histogram.iloc[-2]}")
-
+                print(f"StochRSI K: {stochrsi_k.iloc[-2]}")
+                print(f"StochRSI D: {stochrsi_d.iloc[-2]}")
                 # Make trading decisions for each symbol
                 # Add your trading strategy logic here
 
