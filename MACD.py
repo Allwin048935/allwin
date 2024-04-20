@@ -43,6 +43,11 @@ def fetch_ohlcv(symbol, timeframe, limit):
         ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
         df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
+    # Calculate StochRSI
+        stoch_rsi_indicator = ta.momentum.StochRSIIndicator(df['close'])
+        df['stoch_rsi'] = stoch_rsi_indicator.stochrsi()
+        df['stoch_rsi_k'] = stoch_rsi_indicator.stochrsi_k()
+        df['stoch_rsi_d'] = stoch_rsi_indicator.stochrsi_d()
 
         df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
         df.set_index('timestamp', inplace=True)
