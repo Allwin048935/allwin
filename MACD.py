@@ -136,7 +136,7 @@ def macd_strategy():
         try:
             for symbol in symbols:
                 # Fetch historical data for each symbol with a 15-minute time interval
-                historical_data = fetch_ohlcv(symbol, '1m', 100)
+                historical_data = fetch_ohlcv(symbol, '1h', 100)
 
                 if historical_data is None:
                     continue  # Skip to the next symbol if there's an error fetching data
@@ -147,7 +147,7 @@ def macd_strategy():
                     continue
 
                 # Fetch the latest candlestick for each symbol
-                latest_candle = exchange.fetch_ohlcv(symbol, '1d', limit=1)
+                latest_candle = exchange.fetch_ohlcv(symbol, '1h', limit=100)
                 latest_open = latest_candle[0][1]
 
                 # Calculate the quantity based on the fixed USDT value
