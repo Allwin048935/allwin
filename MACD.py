@@ -59,6 +59,14 @@ def calculate_macd(close_prices, short_window=12, long_window=26, signal_window=
     signal_line = macd_line.rolling(window=signal_window, min_periods=1).mean()
     histogram = macd_line - signal_line
 
+    # Print intermediate results for verification
+    #print("Short SMA:", short_sma.iloc[-2])
+    #print("Long SMA:", long_sma.iloc[-2])
+    print("MACD Line:", macd_line.iloc[-2])
+    print("Signal Line:", signal_line.iloc[-2])
+    print("Histogram:", histogram.iloc[-2])
+    
+    return macd_line, signal_line, histogram
     # Function to fetch historical data for BTCUSDT with StochRSI calculation
 def fetch_btcusdt_stochrsi(timeframe, limit):
     try:
@@ -78,15 +86,6 @@ def fetch_btcusdt_stochrsi(timeframe, limit):
     except Exception as e:
         print(f"Error fetching data for BTCUSDT: {e}")
         return None
-    # Print intermediate results for verification
-    #print("Short SMA:", short_sma.iloc[-2])
-    #print("Long SMA:", long_sma.iloc[-2])
-    print("MACD Line:", macd_line.iloc[-2])
-    print("Signal Line:", signal_line.iloc[-2])
-    print("Histogram:", histogram.iloc[-2])
-    
-    return macd_line, signal_line, histogram
-
 # Function to place a market buy order
 def place_market_buy_order(symbol, quantity):
     try:
