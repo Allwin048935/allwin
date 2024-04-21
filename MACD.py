@@ -151,13 +151,13 @@ def macd_strategy():
         try:
             for symbol in symbols:
                 # Fetch historical data for MACD calculation
-                macd_data = fetch_ohlcv(symbol, '1h', 100)
+                macd_data = fetch_ohlcv(symbol, '15m', 100)
 
                 if macd_data is None:
                     continue  # Skip to the next symbol if there's an error fetching MACD data
 
                 # Fetch historical data for StochRSI calculation
-                stochrsi_data = fetch_btcusdt_stochrsi('1h', 100)
+                stochrsi_data = fetch_btcusdt_stochrsi('5m', 100)
 
                 if stochrsi_data is None:
                     continue  # Skip to the next symbol if there's an error fetching StochRSI data
