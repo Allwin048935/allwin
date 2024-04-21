@@ -59,15 +59,15 @@ def fetch_ohlcv(symbol, timeframe, limit):
         return None
 
 def calculate_macd(close_prices, short_window=12, long_window=26, signal_window=9):
-    short_ema = close_prices.rolling(window=short_window, min_periods=1).mean()
-    long_ema = close_prices.rolling(window=long_window, min_periods=1).mean()
-    macd_line = short_ema - long_ema
+    short_sma = close_prices.rolling(window=short_window, min_periods=1).mean()
+    long_sma = close_prices.rolling(window=long_window, min_periods=1).mean()
+    macd_line = short_sma - long_sma
     signal_line = macd_line.rolling(window=signal_window, min_periods=1).mean()
     histogram = macd_line - signal_line
     
     # Print intermediate results for verification
-    print("Short EMA:", short_ema.iloc[-2])
-    print("Long EMA:", long_ema.iloc[-2])
+    #print("Short SMA:", short_sma.iloc[-2])
+    #print("Long SMA:", long_sma.iloc[-2])
     print("MACD Line:", macd_line.iloc[-2])
     print("Signal Line:", signal_line.iloc[-2])
     print("Histogram:", histogram.iloc[-2])
