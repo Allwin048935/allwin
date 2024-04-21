@@ -45,12 +45,6 @@ def fetch_ohlcv(symbol, timeframe, limit):
         ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
         df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
-    # Calculate StochRSI
-        stoch_rsi_indicator = ta.momentum.StochRSIIndicator(df['close'])
-        df['stoch_rsi'] = stoch_rsi_indicator.stochrsi()
-        df['stoch_rsi_k'] = stoch_rsi_indicator.stochrsi_k()
-        df['stoch_rsi_d'] = stoch_rsi_indicator.stochrsi_d()
-
         df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
         df.set_index('timestamp', inplace=True)
         return df
@@ -64,7 +58,26 @@ def calculate_macd(close_prices, short_window=12, long_window=26, signal_window=
     macd_line = short_sma - long_sma
     signal_line = macd_line.rolling(window=signal_window, min_periods=1).mean()
     histogram = macd_line - signal_line
-    
+
+    # Function to fetch historical data for BTCUSDT with StochRSI calculation
+def fetch_btcusdt_stochrsi(timeframe, limit):
+    try:
+        # Fetch OHLCV data for BTCUSDT pair
+        ohlcv = exchange.fetch_ohlcv('BTC/USDT', timeframe, limit=limit)
+        df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+
+        # Calculate StochRSI
+        stoch_rsi_indicator = ta.momentum.StochRSIIndicator(df['close'])
+        df['stoch_rsi'] = stoch_rsi_indicator.stochrsi()
+        df['stoch_rsi_k'] = stoch_rsi_indicator.stochrsi_k()
+        df['stoch_rsi_d'] = stoch_rsi_indicator.stochrsi_d()
+
+        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+        df.set_index('timestamp', inplace=True)
+        return df
+    except Exception as e:
+        print(f"Error fetching data for BTCUSDT: {e}")
+        return None
     # Print intermediate results for verification
     #print("Short SMA:", short_sma.iloc[-2])
     #print("Long SMA:", long_sma.iloc[-2])
