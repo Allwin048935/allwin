@@ -12,7 +12,7 @@ symbols = [
     'AVAXUSDT', 'AXSUSDT'
 ]
 
-  # Add more symbols if needed
+# Add more symbols if needed
 time_interval = '1h'  # Time interval for fetching candlestick data
 
 # Create a Binance Futures client
@@ -60,15 +60,15 @@ def calculate_macd(close_prices, short_window=12, long_window=26, signal_window=
     histogram = macd_line - signal_line
 
     # Print intermediate results for verification
-    #print("Short SMA:", short_sma.iloc[-2])
-    #print("Long SMA:", long_sma.iloc[-2])
+    # print("Short SMA:", short_sma.iloc[-2])
+    # print("Long SMA:", long_sma.iloc[-2])
     print("MACD Line:", macd_line.iloc[-2])
     print("Signal Line:", signal_line.iloc[-2])
     print("Histogram:", histogram.iloc[-2])
     
     return macd_line, signal_line, histogram
 
-    # Function to fetch historical data for BTCUSDT with StochRSI calculation
+# Function to fetch historical data for BTCUSDT with StochRSI calculation
 def fetch_btcusdt_stochrsi(timeframe, limit):
     try:
         # Fetch OHLCV data for BTCUSDT pair
@@ -77,6 +77,7 @@ def fetch_btcusdt_stochrsi(timeframe, limit):
 
         # Calculate StochRSI
         stoch_rsi_indicator = ta.momentum.StochRSIIndicator(df['close'])
+        df['stoch_rsi'] = stoch_rsi_indicator.stochrsi()
         df['stoch_rsi_k'] = stoch_rsi_indicator.stochrsi_k()
         df['stoch_rsi_d'] = stoch_rsi_indicator.stochrsi_d()
 
@@ -156,8 +157,8 @@ def macd_strategy():
     while True:
         try:
             for symbol in symbols:
-                # Fetch historical data for each symbol with a 15-minute time interval
-                historical_data = fetch_ohlcv(symbol, '1h', 100)
+                # Fetch historical data for each symbol with StochRSI calculation
+                historical_data = fetch_btcusdt_stochrsi('1h', 100)
 
                 if historical_data is None:
                     continue  # Skip to the next symbol if there's an error fetching data
@@ -182,16 +183,16 @@ def macd_strategy():
                 stoch_rsi_d = historical_data['stoch_rsi_d']
 
                 # Print MACD and StochRSI values
-                # print(f"MACD Line for {symbol}: {macd_line.iloc[-2]}")
-                # print(f"Signal Line for {symbol}: {signal_line.iloc[-2]}")
-                # print(f"Histogram for {symbol}: {histogram.iloc[-2]}")
+                print(f"MACD Line for {symbol}: {macd_line.iloc[-2]}")
+                print(f"Signal Line for {symbol}: {signal_line.iloc[-2]}")
+                print(f"Histogram for {symbol}: {histogram.iloc[-2]}")
                 print(f"StochRSI K: {stoch_rsi_k.iloc[-2]}")
                 print(f"StochRSI D: {stoch_rsi_d.iloc[-2]}")
 
                 # Make trading decisions for each symbol
                 # Add your trading strategy logic here
 
-            # Sleep for some time (e.g., 5 minutes) before checking again
+            # Sleep for some time (e.g., 15 minutes) before checking again
             time.sleep(900)
 
         except Exception as e:
@@ -200,4 +201,3 @@ def macd_strategy():
 
 # Run the trading strategy
 macd_strategy()
-
