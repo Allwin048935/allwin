@@ -58,13 +58,6 @@ def calculate_macd(close_prices, short_window=12, long_window=26, signal_window=
     macd_line = short_sma - long_sma
     signal_line = macd_line.rolling(window=signal_window, min_periods=1).mean()
     histogram = macd_line - signal_line
-
-    # Print intermediate results for verification
-    # print("Short SMA:", short_sma.iloc[-2])
-    # print("Long SMA:", long_sma.iloc[-2])
-    print("MACD Line:", macd_line.iloc[-2])
-    print("Signal Line:", signal_line.iloc[-2])
-    print("Histogram:", histogram.iloc[-2])
     
     return macd_line, signal_line, histogram
 
@@ -157,30 +150,36 @@ def macd_strategy():
     while True:
         try:
             for symbol in symbols:
-                # Fetch historical data for each symbol with StochRSI calculation
-                historical_data = fetch_btcusdt_stochrsi('1h', 100)
+                # Fetch historical data for MACD calculation
+                macd_data = fetch_ohlcv(symbol, '1h', 100)
 
-                if historical_data is None:
-                    continue  # Skip to the next symbol if there's an error fetching data
+                if macd_data is None:
+                    continue  # Skip to the next symbol if there's an error fetching MACD data
 
-                # Check if there's enough data for MACD calculation
-                if len(historical_data) < long_window:
+                # Fetch historical data for StochRSI calculation
+                stochrsi_data = fetch_btcusdt_stochrsi('1h', 100)
+
+                if stochrsi_data is None:
+                    continue  # Skip to the next symbol if there's an error fetching StochRSI data
+
+                # Check if there's enough data for MACD and StochRSI calculations
+                if len(macd_data) < long_window or len(stochrsi_data) < 14:  # StochRSI requires at least 14 periods
                     print(f"Not enough data for {symbol}. Waiting for more data...")
                     continue
 
                 # Fetch the latest candlestick for each symbol
-                latest_candle = exchange.fetch_ohlcv(symbol, '1h', limit=100)
+                latest_candle = exchange.fetch_ohlcv(symbol, '1h', limit=1)
                 latest_open = latest_candle[0][1]
 
                 # Calculate the quantity based on the fixed USDT value
                 quantity = fixed_quantity_usdt / float(latest_open)
 
                 # Calculate MACD
-                macd_line, signal_line, histogram = calculate_macd(historical_data['close'])
+                macd_line, signal_line, histogram = calculate_macd(macd_data['close'])
 
                 # Calculate StochRSI
-                stoch_rsi_k = historical_data['stoch_rsi_k']
-                stoch_rsi_d = historical_data['stoch_rsi_d']
+                stoch_rsi_k = stochrsi_data['stoch_rsi_k']
+                stoch_rsi_d = stochrsi_data['stoch_rsi_d']
 
                 # Print MACD and StochRSI values
                 print(f"MACD Line for {symbol}: {macd_line.iloc[-2]}")
