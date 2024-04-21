@@ -67,6 +67,7 @@ def calculate_macd(close_prices, short_window=12, long_window=26, signal_window=
     print("Histogram:", histogram.iloc[-2])
     
     return macd_line, signal_line, histogram
+
     # Function to fetch historical data for BTCUSDT with StochRSI calculation
 def fetch_btcusdt_stochrsi(timeframe, limit):
     try:
@@ -76,7 +77,6 @@ def fetch_btcusdt_stochrsi(timeframe, limit):
 
         # Calculate StochRSI
         stoch_rsi_indicator = ta.momentum.StochRSIIndicator(df['close'])
-        df['stoch_rsi'] = stoch_rsi_indicator.stochrsi()
         df['stoch_rsi_k'] = stoch_rsi_indicator.stochrsi_k()
         df['stoch_rsi_d'] = stoch_rsi_indicator.stochrsi_d()
 
@@ -86,6 +86,7 @@ def fetch_btcusdt_stochrsi(timeframe, limit):
     except Exception as e:
         print(f"Error fetching data for BTCUSDT: {e}")
         return None
+
 # Function to place a market buy order
 def place_market_buy_order(symbol, quantity):
     try:
