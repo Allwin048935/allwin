@@ -71,7 +71,7 @@ def calculate_macd(close_prices, short_window=12, long_window=26, signal_window=
 def fetch_btcusdt_stochrsi(timeframe, limit):
     try:
         # Fetch OHLCV data for BTCUSDT pair
-        ohlcv = exchange.fetch_ohlcv('BTC/USDT', timeframe, limit=limit)
+        ohlcv = exchange.fetch_ohlcv('BTC/USDT', 1h, limit=100)
         df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
         # Calculate StochRSI
