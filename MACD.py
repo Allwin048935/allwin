@@ -234,11 +234,11 @@ def macd_strategy():
 
 
             # Sleep for some time (e.g., 15 minutes) before checking again
-            time.sleep(900)
+            time.sleep(60)
 
         except Exception as e:
             print(f'An error occurred: {e}')
-            time.sleep(900)  # Wait for a minute before trying again
+            time.sleep(60)  # Wait for a minute before trying again
 
 # Run the trading strategy
 macd_strategy()
