@@ -8,8 +8,7 @@ import ta
 BINANCE_API_KEY = 'veiqd07BuRmMlxy3eeRLLKNyDnFrIphTcqgSM7XTRUCzQWTyqxK4sPtfVZioaVHi'
 BINANCE_API_SECRET = 'N4myBDNkkD203gxxpo8NLQgdZxdvzm7N7PpBjBU0DiTtctTLaFQEVev51N4P5R5g'
 symbols = [
-    'AAVEUSDT', 'ACEUSDT', 'ACHUSDT', 'ADAUSDT', 'AEVOUSDT', 'AGIXUSDT', 'AGLDUSDT', 'AIUSDT', 'ALGOUSDT', 'ALICEUSDT', 'ALPHAUSDT', 'ALTUSDT', 'AMBUSDT', 'ANKRUSDT', 'APEUSDT', 'API3USDT', 'APTUSDT', 'ARBUSDT', 'ARKUSDT', 'ARKMUSDT', 'ARPAUSDT', 'ARUSDT', 'ASTRUSDT', 'ATAUSDT', 'ATOMUSDT', 'AUDIOUSDT', 'AUCTIONUSDT', 'AXLUSDT',
-    'AVAXUSDT', 'AXSUSDT'
+    'AAVEUSDT', 'ACEUSDT', 'ACHUSDT', 'ADAUSDT', 'AEVOUSDT', 'AGIXUSDT', 'AGLDUSDT', 'AIUSDT', 'ALGOUSDT', 'ALICEUSDT', 'ALPHAUSDT', 'ALTUSDT', 'AMBUSDT', 'ANKRUSDT', 'APEUSDT', 'API3USDT', 'APTUSDT', 'ARBUSDT', 'ARKUSDT', 'ARKMUSDT', 'ARPAUSDT', 'ARUSDT', 'ASTRUSDT', 'ATAUSDT', 'ATOMUSDT', 'AUDIOUSDT', 'AUCTIONUSDT', 'AXLUSDT', 'AVAXUSDT', 'AXSUSDT'
 ]
 
 # Add more symbols if needed
@@ -182,14 +181,57 @@ def macd_strategy():
                 stoch_rsi_d = stochrsi_data['stoch_rsi_d']
 
                 # Print MACD and StochRSI values
-                print(f"MACD Line for {symbol}: {macd_line.iloc[-2]}")
-                print(f"Signal Line for {symbol}: {signal_line.iloc[-2]}")
-                print(f"Histogram for {symbol}: {histogram.iloc[-2]}")
-                print(f"StochRSI K: {stoch_rsi_k.iloc[-2]}")
-                print(f"StochRSI D: {stoch_rsi_d.iloc[-2]}")
+                #print(f"MACD Line for {symbol}: {macd_line.iloc[-2]}")
+                #print(f"Signal Line for {symbol}: {signal_line.iloc[-2]}")
+                #print(f"Histogram for {symbol}: {histogram.iloc[-2]}")
+                #print(f"StochRSI K: {stoch_rsi_k.iloc[-2]}")
+                #print(f"StochRSI D: {stoch_rsi_d.iloc[-2]}")
 
                 # Make trading decisions for each symbol
-                # Add your trading strategy logic here
+                if (
+                    histogram.iloc[-2] >= histogram.iloc[-3] and
+                    histogram.iloc[-3] <= histogram.iloc[-4] and
+                    stoch_rsi_k.iloc[-2] <= 0.4 and
+                    last_order_types[symbol] != 'BUY'
+                ):
+                    print(f'{symbol} Buy Signal (Short EMA cross over Open)')
+                    # Implement your buy logic here for futures
+                    # For example, place a market buy order
+                    open_orders[symbol] = place_market_buy_order(symbol, quantity)
+                    open_positions[symbol] = 'BUY'
+                    last_order_types[symbol] = 'BUY'
+
+                elif (
+                    close_positions[symbol] == 'BUY' and 
+                    histogram.iloc[-2] <= histogram.iloc[-3] and
+                    histogram.iloc[-3] >= histogram.iloc[-4]
+                ):
+                    print(f'{symbol} Long Exit Signal')
+                    # Close existing long position if short EMA crosses below long EMA
+                    close_long_position(symbol, quantity)
+
+                elif (
+                    histogram.iloc[-2] <= histogram.iloc[-3] and
+                    histogram.iloc[-3] >= histogram.iloc[-4] and
+                    stoch_rsi_k.iloc[-2] >= 0.6 and
+                    last_order_types[symbol] != 'SELL'
+                ):
+                    print(f'{symbol} Sell Signal (Short EMA cross under Open)')
+                    # Implement your sell logic here for futures
+                    # For example, place a market sell order
+                    open_orders[symbol] = place_market_sell_order(symbol, quantity)
+                    open_positions[symbol] = 'SELL'
+                    last_order_types[symbol] = 'SELL'
+
+                elif (
+                    close_positions[symbol] == 'SELL' and
+                    histogram.iloc[-2] >= histogram.iloc[-3] and
+                    histogram.iloc[-3] <= histogram.iloc[-4]
+                ):
+                    print(f'{symbol} Short Exit Signal')
+                    # Close existing short position if short EMA crosses above long EMA
+                    close_short_position(symbol, quantity)
+
 
             # Sleep for some time (e.g., 15 minutes) before checking again
             time.sleep(900)
