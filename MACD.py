@@ -12,7 +12,7 @@ symbols = [
 ]
 
 # Add more symbols if needed
-time_interval = '1h'  # Time interval for fetching candlestick data
+time_interval = '5m'  # Time interval for fetching candlestick data
 
 # Create a Binance Futures client
 exchange = ccxt.binance({
@@ -25,8 +25,8 @@ exchange = ccxt.binance({
 })
 
 # Define MACD strategy parameters
-short_window = 12
-long_window = 26
+short_window = 8
+long_window = 17
 signal_window = 9
 
 # Track the last order type placed for each symbol
@@ -150,7 +150,7 @@ def macd_strategy():
         try:
             for symbol in symbols:
                 # Fetch historical data for MACD calculation
-                macd_data = fetch_ohlcv(symbol, '15m', 100)
+                macd_data = fetch_ohlcv(symbol, '5m', 100)
 
                 if macd_data is None:
                     continue  # Skip to the next symbol if there's an error fetching MACD data
@@ -167,7 +167,7 @@ def macd_strategy():
                     continue
 
                 # Fetch the latest candlestick for each symbol
-                latest_candle = exchange.fetch_ohlcv(symbol, '1h', limit=1)
+                latest_candle = exchange.fetch_ohlcv(symbol, '5m', limit=1)
                 latest_open = latest_candle[0][1]
 
                 # Calculate the quantity based on the fixed USDT value
@@ -181,11 +181,11 @@ def macd_strategy():
                 stoch_rsi_d = stochrsi_data['stoch_rsi_d']
 
                 # Print MACD and StochRSI values
-                #print(f"MACD Line for {symbol}: {macd_line.iloc[-2]}")
-                #print(f"Signal Line for {symbol}: {signal_line.iloc[-2]}")
-                #print(f"Histogram for {symbol}: {histogram.iloc[-2]}")
-                #print(f"StochRSI K: {stoch_rsi_k.iloc[-2]}")
-                #print(f"StochRSI D: {stoch_rsi_d.iloc[-2]}")
+                print(f"MACD Line for {symbol}: {macd_line.iloc[-2]}")
+                print(f"Signal Line for {symbol}: {signal_line.iloc[-2]}")
+                print(f"Histogram for {symbol}: {histogram.iloc[-2]}")
+                print(f"StochRSI K: {stoch_rsi_k.iloc[-2]}")
+                print(f"StochRSI D: {stoch_rsi_d.iloc[-2]}")
 
                 # Make trading decisions for each symbol
                 if (
