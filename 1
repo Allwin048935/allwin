@@ -1,177 +1,108 @@
-import ccxt
+from binance.client import Client
+from binance.enums import *
 import pandas as pd
-import time
 import ta
+import matplotlib.pyplot as plt
+import io
+from scipy.signal import find_peaks
+from datetime import datetime
+from pytz import timezone
+from PIL import Image
+from telegram import Bot
 
-# Add your Binance API key, secret, symbols, and time_interval
-BINANCE_API_KEY = 'veiqd07BuRmMlxy3eeRLLKNyDnFrIphTcqgSM7XTRUCzQWTyqxK4sPtfVZioaVHi'
-BINANCE_API_SECRET = 'N4myBDNkkD203gxxpo8NLQgdZxdvzm7N7PpBjBU0DiTtctTLaFQEVev51N4P5R5g'
-symbols = [
-    '1INCHUSDT', '1000SATSUSDT', '1000BONKUSDT', '1000FLOKIUSDT', '1000XECUSDT', '1000LUNCUSDT', '1000PEPEUSDT', '1000SHIBUSDT', 'AAVEUSDT', 'ACEUSDT', 'ACHUSDT', 'ADAUSDT', 'AEVOUSDT', 'AGIXUSDT', 'AGLDUSDT', 'AIUSDT', 'ALGOUSDT', 'ALICEUSDT', 'ALPHAUSDT', 'ALTUSDT', 'AMBUSDT', 'ANKRUSDT', 'APEUSDT', 'API3USDT', 'APTUSDT', 'ARBUSDT', 'ARKUSDT', 'ARKMUSDT', 'ARPAUSDT', 'ARUSDT', 'ASTRUSDT', 'ATAUSDT', 'ATOMUSDT', 'AUDIOUSDT', 'AUCTIONUSDT', 'AXLUSDT',
-    'AVAXUSDT', 'AXSUSDT', 'BADGERUSDT', 'BALUSDT', 'BANDUSDT', 'BAKEUSDT', 'BATUSDT', 'BEAMXUSDT', 'BELUSDT', 'BCHUSDT', 'BICOUSDT', 'BIGTIMEUSDT',
-    'BLURUSDT', 'BLZUSDT', 'BNBUSDT', 'BNTUSDT', 'BOMEUSDT', 'BONDUSDT', 'BSVUSDT', 'BTCUSDT', 'C98USDT', 'CAKEUSDT', 'CELOUSDT', 'CELRUSDT', 'CFXUSDT', 'CHRUSDT', 'CKBUSDT', 'CHZUSDT',
-    'COMBOUSDT','COMPUSDT', 'COTIUSDT', 'CRVUSDT', 'CTSIUSDT', 'CVXUSDT', 'CYBERUSDT', 'DARUSDT', 'DASHUSDT', 'DEFIUSDT', 'DENTUSDT', 'DODOXUSDT',
-    'DOGEUSDT', 'DOTUSDT', 'DUSKUSDT', 'DYDXUSDT', 'DYMUSDT', 'EDUUSDT', 'EGLDUSDT', 'ENJUSDT', 'ENSUSDT', 'EOSUSDT', 'ETCUSDT', 'ETHUSDT', 'ETHFIUSDT', 'ETHWUSDT', 'FETUSDT',
-    'FILUSDT', 'FLMUSDT', 'FLOWUSDT', 'FRONTUSDT', 'FTMUSDT', 'FXSUSDT', 'GALAUSDT', 'GALUSDT', 'GASUSDT', 'GLMRUSDT', 'GLMUSDT', 'GMTUSDT', 'GMXUSDT', 'GTCUSDT', 'GRTUSDT', 'HBARUSDT', 'HIGHUSDT',
-    'HFTUSDT', 'HIFIUSDT', 'HOOKUSDT', 'HOTUSDT', 'ICPUSDT', 'ICXUSDT', 'IDEXUSDT', 'IDUSDT', 'ILVUSDT', 'IMXUSDT', 'INJUSDT', 'IOTXUSDT', 'IOSTUSDT', 'IOTAUSDT', 'JASMYUSDT', 'JOEUSDT', 'JTOUSDT', 'JUPUSDT', 'KASUSDT', 'KAVAUSDT', 'KEYUSDT', 'KNCUSDT',
-    'KLAYUSDT', 'KNCUSDT', 'KSMUSDT', 'LDOUSDT', 'LEVERUSDT', 'LINKUSDT', 'LINAUSDT', 'LITUSDT', 'LOOMUSDT', 'LPTUSDT', 'LQTYUSDT', 'LRCUSDT', 'LSKUSDT', 'LTCUSDT', 'LUNA2USDT', 'MAGICUSDT', 'MANTAUSDT',
-    'MANAUSDT', 'MASKUSDT', 'MATICUSDT', 'MAVIAUSDT', 'MAVUSDT', 'MBLUSDT', 'MDTUSDT', 'MEMEUSDT', 'METISUSDT', 'MINAUSDT', 'MKRUSDT', 'MOVRUSDT', 'MTLUSDT', 'MYROUSDT', 'NEARUSDT', 'NEOUSDT', 'NFPUSDT',
-    'NKNUSDT', 'NMRUSDT', 'NTRNUSDT', 'OCEANUSDT', 'OGNUSDT', 'OMGUSDT', 'OMUSDT', 'ONDOUSDT', 'ONEUSDT', 'ONTUSDT', 'OPUSDT', 'ORBSUSDT',
-    'ORDIUSDT', 'OXTUSDT', 'PENDLEUSDT', 'PEOPLEUSDT', 'PERPUSDT', 'PHBUSDT', 'PIXELUSDT', 'POLYXUSDT', 'PORTALUSDT', 'POWRUSDT', 'PYTHUSDT', 'QNTUSDT', 'QTUMUSDT', 'RADUSDT', 'RDNTUSDT', 'REEFUSDT', 'RENUSDT',
-    'RIFUSDT', 'RLCUSDT', 'RNDRUSDT', 'RONINUSDT', 'ROSEUSDT', 'RSRUSDT', 'RVNUSDT', 'RUNEUSDT', 'SANDUSDT', 'SEIUSDT', 'SFPUSDT', 'SKLUSDT',
-    'SLPUSDT', 'SNTUSDT', 'SNXUSDT', 'SOLUSDT', 'SPELLUSDT', 'SSVUSDT', 'STEEMUSDT', 'STGUSDT', 'STMXUSDT', 'STORJUSDT', 'STPTUSDT', 'STRKUSDT', 'STXUSDT',
-    'SUIUSDT', 'SUPERUSDT', 'SUSHIUSDT', 'SXPUSDT', 'THETAUSDT', 'TIAUSDT', 'TLMUSDT', 'TOKENUSDT', 'TONUSDT', 'TRBUSDT', 'TRUUSDT', 'TRXUSDT', 'TUSDT', 'TWTUSDT', 'UMAUSDT', 'UNFIUSDT', 'UNIUSDT',
-    'VANRYUSDT', 'VETUSDT', 'WAVESUSDT', 'WAXPUSDT', 'WIFUSDT', 'WLDUSDT', 'WOOUSDT',
-    'XAIUSDT', 'XEMUSDT', 'XLMUSDT', 'XMRUSDT', 'XRPUSDT', 'XTZUSDT', 'XVGUSDT', 'XVSUSDT', 'YFIUSDT', 'YGGUSDT', 'ZECUSDT',
-    'ZENUSDT', 'ZETAUSDT', 'ZILUSDT', 'ZRXUSDT'
-]  # Example: ['BTC/USDT', 'ETH/USDT']
+# Binance API credentials
+api_key = 'your_api_key'
+api_secret = 'your_api_secret'
 
-time_interval = '2h'  # Example: '1h'
+# Telegram Bot token and chat ID
+bot_token = 'your_bot_token'
+chat_id = 'your_chat_id'
 
-# Create a Binance Futures client
-exchange = ccxt.binance({
-    'apiKey': BINANCE_API_KEY,
-    'secret': BINANCE_API_SECRET,
-    'enableRateLimit': True,
-    'options': {
-        'defaultType': 'future',  # Set the default type to futures
-    }
-})
+client = Client(api_key, api_secret)
 
-# Define EMA strategy parameters
-short_ema_period = 7
-medium_ema_period = 44
-long_ema_period = 50
+def get_historical_data(symbol, interval, limit):
+    """Fetches historical price data from Binance"""
+    klines = client.get_historical_klines(symbol, interval, f"{limit} day ago UTC")
+    data = pd.DataFrame(klines, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume', 'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'])
+    data['timestamp'] = pd.to_datetime(data['timestamp'], unit='ms')
+    data.set_index('timestamp', inplace=True)
+    return data
 
-# Track the last order type placed for each symbol
-last_order_types = {symbol: None for symbol in symbols}
-open_positions = {symbol: None for symbol in symbols}
+def find_peaks_and_valleys(data):
+    """Finds peaks and valleys for trendline detection"""
+    close_values = data['close'].to_numpy()
+    peaks, _ = find_peaks(close_values)
+    valleys, _ = find_peaks(-close_values)
+    return peaks, valleys
 
-# Fixed quantity in USDT worth of contracts
-fixed_quantity_usdt = 6
+def detect_trendlines(data, peaks, valleys):
+    """Detects trendlines using peaks and valleys"""
+    trendlines = []
+    
+    # Find trendlines connecting peaks and valleys
+    for peak in peaks:
+        for valley in valleys:
+            if valley < peak:
+                trendlines.append((valley, peak))
+                break
+    
+    return trendlines
 
-# Function to fetch historical data for futures with EMA and StochRSI calculation
-def fetch_ohlcv(symbol, timeframe, limit):
-    ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
-    df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+def plot_breakout_chart(symbol, data, trendlines):
+    """Plot breakout chart with detected trendlines and return image object"""
+    plt.figure(figsize=(12, 6))
+    plt.plot(data.index, data['close'], label='Close Price', color='blue')
+    
+    # Plot trendlines
+    for line in trendlines:
+        plt.plot(data.index[[line[0], line[1]]], data['close'][[line[0], line[1]]], linestyle='--', color='orange')
+    
+    plt.title(f"Trendline Breakout Strategy - {symbol}")
+    plt.xlabel('Date')
+    plt.ylabel('Price')
+    plt.legend()
+    plt.grid(True)
+    
+    # Save image to a BytesIO object
+    img_bytes = io.BytesIO()
+    plt.savefig(img_bytes, format='png')
+    img_bytes.seek(0)
+    
+    # Close plot to release memory
+    plt.close()
+    
+    return img_bytes
 
-    df['short_ema'] = calculate_ema(df, short_ema_period)
-    df['medium_ema'] = calculate_ema(df, medium_ema_period)
-    df['long_ema'] = calculate_ema(df, long_ema_period)
+def breakout_strategy(symbol, interval='1h', limit=10):
+    """Trendline breakout strategy"""
+    data = get_historical_data(symbol, interval, limit)
+    
+    # Find peaks and valleys
+    peaks, valleys = find_peaks_and_valleys(data)
+    
+    # Detect trendlines
+    trendlines = detect_trendlines(data, peaks, valleys)
+    
+    # Check for breakout conditions
+    if len(trendlines) > 0:
+        return True, data, trendlines
+    else:
+        return False, data, []
 
-    # Calculate StochRSI
-    stoch_rsi_indicator = ta.momentum.StochRSIIndicator(df['close'])
-    df['stoch_rsi'] = stoch_rsi_indicator.stochrsi()
-    df['stoch_rsi_k'] = stoch_rsi_indicator.stochrsi_k()
-    df['stoch_rsi_d'] = stoch_rsi_indicator.stochrsi_d()
+def send_image_to_telegram(image_bytes):
+    """Send image to Telegram"""
+    bot = Bot(token=bot_token)
+    timestamp = datetime.now(timezone('UTC')).strftime('%Y-%m-%d %H:%M:%S %Z')
+    caption = f"Trendline Breakout detected at {timestamp}"
+    bot.send_photo(chat_id=chat_id, photo=image_bytes, caption=caption)
 
-    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-    df.set_index('timestamp', inplace=True)
-    return df
-
-# Function to calculate EMA
-def calculate_ema(df, period, column='close'):
-    return df[column].ewm(span=period, adjust=False).mean()
-
-# Function to place a market buy order
-def place_market_buy_order(symbol, quantity):
-    try:
-        order = exchange.create_market_buy_order(
-            symbol=symbol,
-            amount=quantity
-        )
-        print(f"Market Buy Order placed for {symbol}: {order}")
-        return order
-    except Exception as e:
-        print(f"Error placing Market Buy Order for {symbol}: {e}")
-
-# Function to place a market sell order
-def place_market_sell_order(symbol, quantity):
-    try:
-        order = exchange.create_market_sell_order(
-            symbol=symbol,
-            amount=quantity
-        )
-        print(f"Market Sell Order placed for {symbol}: {order}")
-        return order
-    except Exception as e:
-        print(f"Error placing Market Sell Order for {symbol}: {e}")
-
-# Main trading function for futures
-def ema_strategy():
-    while True:
-        try:
-            for symbol in symbols:
-                # Fetch historical data for each symbol
-                historical_data = fetch_ohlcv(symbol, time_interval, 200)
-
-                # Check if there's enough data for EMA calculation
-                if len(historical_data) < long_ema_period:
-                    print(f"Not enough data for {symbol}. Waiting for more data...")
-                    continue
-
-                # Calculate EMA values
-                short_ema_values = historical_data['short_ema']
-                medium_ema_values = historical_data['medium_ema']
-                long_ema_values = historical_data['long_ema']
-
-                # Print EMA values
-                #print(f'{symbol} EMA Values:')
-                #print('Short EMA 2:', short_ema_values.iloc[-2])
-                #print('Short EMA 3:', short_ema_values.iloc[-3])
-                #print('Long EMA:', long_ema_values.iloc[-1])
-
-                # Fetch the latest candlestick for each symbol
-                latest_candle = exchange.fetch_ticker(symbol)
-
-                if 'close' not in latest_candle:
-                    print(f"Error: 'close' not found in the latest_candle for {symbol}")
-                    continue
-
-                latest_close = latest_candle.get('close')
-
-                # Check if latest_close is None or not a valid number
-                if latest_close is None or not isinstance(latest_close, (int, float)):
-                    print(f"Error: Invalid value for latest_close for {symbol}")
-                    continue
-
-                # Calculate the quantity based on the fixed USDT value
-                quantity = fixed_quantity_usdt / float(latest_close)
-                
-                
-                # Make trading decisions for each symbol
-                if (
-    (
-        historical_data['stoch_rsi_k'].iloc[-2] > historical_data['stoch_rsi_d'].iloc[-2] and
-        historical_data['stoch_rsi_k'].iloc[-3] < historical_data['stoch_rsi_d'].iloc[-3] and
-        last_order_types[symbol] != 'BUY'
-    )
-):
-                    print(f'{symbol} Buy Signal (Crossover)')
-                    # Implement your buy logic here for futures
-                    # For example, place a market buy order
-                    open_positions[symbol] = place_market_buy_order(symbol, quantity)
-                    last_order_types[symbol] = 'BUY'
-
-                elif (
-    (
-        historical_data['stoch_rsi_k'].iloc[-2] < historical_data['stoch_rsi_d'].iloc[-2] and
-        historical_data['stoch_rsi_k'].iloc[-3] > historical_data['stoch_rsi_d'].iloc[-3] and
-        last_order_types[symbol] != 'SELL'
-    )
-):
-                    print(f'{symbol} Sell Signal (Crossunder)')
-                    # Implement your sell logic here for futures
-                    # For example, place a market sell order
-                    open_positions[symbol] = place_market_sell_order(symbol, quantity)
-                    last_order_types[symbol] = 'SELL'
-
-            # Sleep for some time (e.g., 5 minutes) before checking again
-            time.sleep(300)
-
-        except Exception as e:
-            print(f'An error occurred: {e}')
-            time.sleep(300)  # Wait for a minute before trying again
-
-# Run the trading strategy
-ema_strategy()
+# Example usage:
+if __name__ == '__main__':
+    symbol = 'BTCUSDT'
+    breakout_detected, data, trendlines = breakout_strategy(symbol)
+    
+    if breakout_detected:
+        image_bytes = plot_breakout_chart(symbol, data, trendlines)
+        send_image_to_telegram(image_bytes)
+    else:
+        print(f"No trendline breakout detected for {symbol} on {interval} chart.")
