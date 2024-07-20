@@ -1,0 +1,93 @@
+import ccxt
+import pandas as pd
+import asyncio
+import nest_asyncio
+from telegram import Bot
+from config import symbols
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+BINANCE_API_KEY = os.getenv('BINANCE_API_KEY')
+BINANCE_API_SECRET = os.getenv('BINANCE_API_SECRET')
+telegram_token = os.getenv('TELEGRAM_TOKEN')
+chat_id = os.getenv('CHAT_ID')
+
+interval = '4h'  # 4-hour candlesticks
+
+# Initialize Binance client
+exchange = ccxt.binance({
+    'apiKey': BINANCE_API_KEY,
+    'secret': BINANCE_API_SECRET,
+    'enableRateLimit': True,
+    'options': {
+        'defaultType': 'future',  # Set the default type to futures
+    }
+})
+
+# Dictionary to store the last alert messages for each symbol
+last_alert_messages = {}
+
+# Function to get historical candlestick data
+def get_historical_data(symbol, interval, limit=50):
+    ohlcv = exchange.fetch_ohlcv(symbol, interval, limit=limit)
+    df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+    df.set_index('timestamp', inplace=True)
+    return df
+
+# Function to calculate VEMA
+def vema(df, period):
+    price_vol = df['close'] * df['volume']
+    vema = price_vol.ewm(span=period, adjust=False).mean() / df['volume'].ewm(span=period, adjust=False).mean()
+    return vema
+
+# Function to check VEMA cross
+def check_vema_cross(df, short_period=1, long_period=2, medium_period=14):
+    df['vema_short'] = vema(df, short_period)
+    df['vema_long'] = vema(df, long_period)
+    df['vema_medium'] = vema(df, medium_period)
+
+    cross_over = df['vema_short'].iloc[-2] >= df['vema_long'].iloc[-2] and df['vema_short'].iloc[-3] <= df['vema_long'].iloc[-3] and df['vema_short'].iloc[-2] <= df['vema_medium'].iloc[-2]
+    cross_under = df['vema_short'].iloc[-2] <= df['vema_long'].iloc[-2] and df['vema_short'].iloc[-3] >= df['vema_long'].iloc[-3] and df['vema_short'].iloc[-2] >= df['vema_medium'].iloc[-2]
+
+    return cross_over, cross_under
+
+# Function to send Telegram message (now defined as async)
+async def send_telegram_message(symbol, message):
+    # Check if the current message is the same as the previous one for this symbol
+    if last_alert_messages.get(symbol) != message:
+        await telegram_bot.send_message(chat_id=chat_id, text=message)
+        # Update the last alert message for this symbol
+        last_alert_messages[symbol] = message
+
+# Modify the main function to use symbols from the configuration file
+async def main():
+    while True:
+        for symbol in symbols:
+            try:
+                historical_data = get_historical_data(symbol, interval)
+                cross_over, cross_under = check_vema_cross(historical_data)
+
+                if cross_over:
+                    message = f'#Over #{symbol}'
+                    await send_telegram_message(symbol, message)
+
+                if cross_under:
+                    message = f'#Under #{symbol}'
+                    await send_telegram_message(symbol, message)
+
+            except Exception as e:
+                print(f"Error processing {symbol}: {e}")
+
+        # Sleep for a specified interval before checking again
+        await asyncio.sleep(300)  # Adjust the sleep duration as needed
+
+# Initialize Telegram Bot
+telegram_bot = Bot(token=telegram_token)
+
+# Use nest_asyncio to allow running asyncio in Jupyter notebooks
+nest_asyncio.apply()
+
+# Create and run the event loop
+asyncio.run(main())
