@@ -127,12 +127,12 @@ async def main():
 
                 # EMA cross events
                 if ema_cross_over:
-                    message = f'/enter_long {symbol}'
+                    message = f'/set_symbols long {symbol}'
                     title = f'EMA Cross Over for {symbol}'
                     image_buffer = plot_candles(historical_data, symbol, title)
                     await send_telegram_message(symbol, message, image_buffer)
                 elif ema_cross_under:
-                    message = f'/enter_short {symbol}'
+                    message = f'//set_symbols short {symbol}'
                     title = f'EMA Cross Under for {symbol}'
                     image_buffer = plot_candles(historical_data, symbol, title)
                     await send_telegram_message(symbol, message, image_buffer)
