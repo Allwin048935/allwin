@@ -8,23 +8,20 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler
 from ta.trend import MACD  # Import MACD from the ta library
 
-interval = '4h'
+interval = '12h'
 
-# Initialize Bitget client
-bitget = ccxt.bitget({
+# Initialize Binance client
+binance = ccxt.binance({
     'apiKey': config.API_KEY,
     'secret': config.API_SECRET,
 })
-
-# Dictionary to store the last alert messages for each symbol
-last_alert_messages = {}
 
 # List of selected symbols from Telegram (global variable)
 selected_symbols = []
 
 # Function to get historical candlestick data
 def get_historical_data(symbol, interval, limit=50):
-    ohlcv = bitget.fetch_ohlcv(symbol, interval, limit=limit)
+    ohlcv = binance.fetch_ohlcv(symbol, interval, limit=limit)
     df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     df.set_index('timestamp', inplace=True)
@@ -46,23 +43,23 @@ def check_histogram_conditions(df):
 
 # Function to send a message to Telegram
 def send_telegram_message(symbol, action, close_price):
-    if last_alert_messages.get(symbol) != action:
-        message = f"{action} {symbol}" #f"Alert: {symbol} - {action}\nPrice: {close_price}"
-        url = f"https://api.telegram.org/bot{config.TELEGRAM_TOKEN_EXIT}/sendMessage"
-        params = {"chat_id": config.TELEGRAM_CHAT_ID, "text": message}
-        
-        try:
-            response = requests.get(url, params=params)
-            if response.status_code == 200:
-                print(f"Sent alert for {symbol} with action {action} to Telegram")
-                last_alert_messages[symbol] = action
-            else:
-                print(f"Failed to send Telegram alert for {symbol}: {response.content}")
+    message = f"{action} {symbol}"  # Modify message format as needed
+    url = f"https://api.telegram.org/bot{config.TELEGRAM_TOKEN_EXIT}/sendMessage"
+    params = {"chat_id": config.TELEGRAM_CHAT_ID, "text": message}
 
-        except requests.RequestException as e:
-            print(f"Error sending Telegram request for {symbol}: {e}")
+    try:
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            print(f"Sent alert for {symbol} with action {action} to Telegram")
+            return True  # Alert sent successfully
+        else:
+            print(f"Failed to send Telegram alert for {symbol}: {response.content}")
+            return False
+    except requests.RequestException as e:
+        print(f"Error sending Telegram request for {symbol}: {e}")
+        return False
 
-# Updated function to set symbols by matching against config.SELECTED_SYMBOLS
+# Command to set symbols
 async def set_symbols(update: Update, context) -> None:
     global selected_symbols
     user_symbols = context.args
@@ -86,17 +83,17 @@ async def set_symbols(update: Update, context) -> None:
     else:
         await update.message.reply_text("No symbols provided. Usage: /set_symbols BTC/USDT ETH/USDT")
 
-# Command to reset symbols and last alert messages
+# Command to reset symbols
 async def reset_symbols(update: Update, context) -> None:
-    global selected_symbols, last_alert_messages
+    global selected_symbols
     selected_symbols = []
-    last_alert_messages.clear()  # Clear last alert messages
-    await update.message.reply_text("Symbols and last alert messages have been reset.")
+    await update.message.reply_text("Symbols have been reset.")
 
 # Main trading function
 async def main_trading():
+    global selected_symbols
     while True:
-        for symbol in selected_symbols:
+        for symbol in selected_symbols[:]:  # Iterate over a copy of the list
             try:
                 historical_data = get_historical_data(symbol, interval)
                 historical_data = calculate_macd(historical_data)
@@ -104,14 +101,16 @@ async def main_trading():
                 close_price = historical_data['close'].iloc[-1]
 
                 if long_condition:
-                    send_telegram_message(symbol, "/exit_short", close_price)
+                    if send_telegram_message(symbol, "/exit_short", close_price):
+                        selected_symbols.remove(symbol)  # Remove symbol after alert
                 elif short_condition:
-                    send_telegram_message(symbol, "/exit_long", close_price)
+                    if send_telegram_message(symbol, "/exit_long", close_price):
+                        selected_symbols.remove(symbol)  # Remove symbol after alert
 
             except Exception as e:
                 print(f"Error processing {symbol}: {e}")
 
-        await asyncio.sleep(60)
+        await asyncio.sleep(120)
 
 # Start Telegram bot
 async def start_telegram_bot():
