@@ -4,9 +4,8 @@
 BINANCE_API_KEY = 'veiqd07BuRmMlxy3eeRLLKNyDnFrIphTcqgSM7XTRUCzQWTyqxK4sPtfVZioaVHi'
 BINANCE_API_SECRET = 'N4myBDNkkD203gxxpo8NLQgdZxdvzm7N7PpBjBU0DiTtctTLaFQEVev51N4P5R5g'
 
-# Telegram API keys
-#TELEGRAM_BOT_TOKEN = ''
-#TELEGRAM_CHAT_ID = ''
+TELEGRAM_TOKEN = '8066951467:AAHOaFDL9kixcdwtjbwb-szDgnl8R9Vz8AI'
+CHAT_ID = '1385370555'
 
 
 # List of futures trading pairs (symbols)
